@@ -1,9 +1,9 @@
 // Bar Management Dashboard — schema
-// Local dev: SQLite (file:./dev.db, via prisma.config.ts fallback).
-// Deploy swap: change provider to "postgresql", point BARMGMT_DB_CONN at Neon,
-// swap the adapter in src/lib/prisma.ts from PrismaBetterSqlite3 to PrismaPg
-// (same swap Dolipa Store did — see that project's TECHNICAL-GUIDE.md §7 row 5).
-// Money/quantity fields are Float on SQLite; reconsider Decimal once on Postgres.
+// Deployed: Postgres (Neon, via Vercel integration) — BARMGMT_DB_CONN.
+// Local dev without a real DB: point BARMGMT_DB_CONN at the same Neon instance,
+// or set it to a local Postgres. SQLite is no longer supported (dropped once
+// deploy happened — money/quantity Float fields carried over, Decimal not
+// revisited yet, still an open item).
 
 generator client {
   provider = "prisma-client"
@@ -11,7 +11,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 // ─────────────────────────── Core / Auth ───────────────────────────
