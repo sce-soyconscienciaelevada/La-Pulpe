@@ -70,21 +70,33 @@ Cocktail costing (`src/lib/costeo.ts`) sums each `RecipeIngredient.quantity` (in
 
 `@react-pdf/renderer`'s `pdf(<Document>...).toBlob()` API, returned directly as the Response body — no stream-piping needed. Route handlers must be `.tsx` (not `.ts`) since they contain JSX; this was a real bug caught during testing (all 4 routes 500'd until renamed). Shared styles in `src/lib/pdf/theme.tsx`.
 
-## 7. Deploy — not done yet, here's the plan
+## 7. Deploy — done, live at https://la-pulpe-three.vercel.app
 
-1. Joan provides a GitHub destination; `git remote add origin ...` + push (repo is already initialized locally, first commit `de136ac`).
-2. Provision Neon via Vercel's Storage tab (same flow as Dolipa Store).
-3. In `prisma/schema.prisma`, change `datasource db { provider = "sqlite" }` to `"postgresql"`.
-4. In `src/lib/prisma.ts`, swap `PrismaBetterSqlite3` for `PrismaPg` (`@prisma/adapter-pg`, already a dependency) pointed at `BARMGMT_DB_CONN`.
-5. Fresh migration history against Postgres (Prisma won't let one history span two providers — same thing Dolipa hit).
-6. Set `BARMGMT_DB_CONN` and `BARMGMT_AUTH_SECRET` in Vercel env vars (real values, not the dev fallback).
-7. Run the seed script against the live Neon DB once, with Joan's explicit confirmation before each direct-DB action (per this vault's standing rule).
-8. Change the seeded admin password (`pablo@lapulpe.local` / `cambiar123`) before handing off to Pablo.
-9. Re-run `scripts/verify-app.ts` against the live URL (update `BASE` constant) to confirm the deploy actually works, not just that the build succeeded.
+**Stack**: GitHub (`sce-soyconscienciaelevada/La-Pulpe`, public) → Vercel (`inner-s-projects/la-pulpe`) → Neon Postgres (via Vercel's marketplace integration).
+
+**What actually happened, in order** (useful if setting up a second bar/instance later):
+1. `vercel login` — doesn't work non-interactively. Use its device-flow (`npx vercel login` prints a `vercel.com/oauth/device?user_code=...` URL) and have the account owner authorize it in their own browser.
+2. `vercel link --yes --project <name>` from `site/` — creates the project, auto-connects the GitHub repo.
+3. `vercel integration add neon` — provisions Neon and connects it to the project in one step. Free tier, no billing wall hit.
+4. `vercel env pull --environment=production <non-.env-name>.txt`, extract `POSTGRES_PRISMA_URL` with `grep`/`cut`, pipe it (never print it) into `vercel env add BARMGMT_DB_CONN production` and `... preview`. Same for a freshly generated `BARMGMT_AUTH_SECRET`. Delete the temp dump file immediately after — it's not `.env`-named so `.gitignore`'s `.env*` rule doesn't catch it, and it contains raw secrets.
+5. Swapped `prisma/schema.prisma` provider to `"postgresql"`, `src/lib/prisma.ts`'s adapter to `PrismaPg`, deleted the SQLite migration folder, ran a fresh `prisma migrate dev` + `prisma generate` + the seed script directly against the live Neon DB (export the connection string into the shell for that one command — Bash tool sessions don't persist env vars between calls, so this has to happen in a single chained command each time).
+6. `git push origin main` — **does not auto-deploy**, see gotcha below. Deploy with `npx vercel --prod` from `site/` instead.
+7. Set the real admin password directly on prod: `BARMGMT_DB_CONN=... npx tsx scripts/set-admin-password.ts '<new-password>'`.
+
+**Gotcha 1 — GitHub webhook auto-deploy never fired.** Two separate `git push`es after the initial `vercel link` produced zero new deployments (`vercel ls` stayed at 1). Root cause not diagnosed. Until this is fixed: **every deploy needs a manual `npx vercel --prod`**, pushing to GitHub alone is not enough.
+
+**Gotcha 2 — "Deployment Blocked" for 39+ minutes with no CLI-visible reason.** `vercel logs` / `vercel inspect` showed nothing useful (status stuck `UNKNOWN`, empty builds list) — the real error only showed up on the Vercel *dashboard's* deployment detail page: **"Deployment Blocked — commit author did not have contributing access... Hobby Plan doesn't support collaboration for private repositories."** Vercel checks the git commit author's GitHub identity against project access, separately from who's authenticated in the CLI. Fixed by making the GitHub repo public (the other options were adding the commit author as an explicit project member, or upgrading to Pro — both real tradeoffs, this one was free and fit the "sell this later" plan). **If build logs seem to vanish into a void again, check the dashboard deployment page directly — the CLI doesn't surface everything.**
+
+**Gotcha 3 — Vercel's own login wall blocked the app before the app's login even ran.** Project Settings → Deployment Protection → "Require Log In" (Vercel Authentication) is ON by default for team-scoped projects and gates *every* deployment URL, including production, behind a Vercel-account + team-membership check. Pablo will never have a Vercel account. Turned it off — the app's own `/login` (admin-only credentials, `requireAdmin()` on every Server Action) is the real access control here, this was a redundant second gate in front of it.
 
 ## 8. Testing
 
-`scripts/verify-app.ts` — a from-scratch Playwright script (not `@playwright/test`, just raw `chromium.launch()`) that logs in, hits all 12 routes, exercises every golden path with real assertions (not just "page loaded"), fetches all 4 PDFs and checks the `%PDF` magic bytes, and re-runs every route at a 375px viewport checking `document.documentElement.scrollWidth`. Currently 62/62 passing. Re-run anytime with `npx tsx scripts/verify-app.ts` against a running dev server. `scripts/verify-seed.ts` is a smaller sanity check for the seed data specifically.
+Two separate scripts, deliberately not interchangeable:
+
+- **`scripts/verify-app.ts`** — mutates data (creates products, taps fake sales, force-closes a stock period to test reconciliation). **Local/dev database only.** A from-scratch Playwright script (not `@playwright/test`, just raw `chromium.launch()`) that logs in, hits all 12 routes, exercises every golden path with real assertions, fetches all 4 PDFs and checks the `%PDF` magic bytes, and re-runs every route at a 375px viewport. 62/62 passing as of the last local run.
+- **`scripts/verify-prod-readonly.ts`** — read-only, safe to run against the live production database anytime. Login, all 12 routes, one real PDF fetch, and a row-count check. Used to confirm the actual deploy after going live, without polluting Pablo's real data with test artifacts.
+- **`scripts/verify-seed.ts`** — sanity check for seed data (counts, quick-grid mapping, recipes).
+- **`scripts/set-admin-password.ts <new-password>`** — rotates the admin password directly against whatever `BARMGMT_DB_CONN` points at. Used to replace the seeded placeholder before real handoff.
 
 ## 9. Known limitations (decisions, not bugs)
 
@@ -94,4 +106,4 @@ Cocktail costing (`src/lib/costeo.ts`) sums each `RecipeIngredient.quantity` (in
 - Kitchen/food module (pizzas etc. from the costing Excel) is phase 3, schema-ready via `Category.kind` but no UI.
 - Staff logins (`User.role` beyond OWNER) are schema-ready, not built.
 - `AuditLog` model exists but nothing writes to it yet.
-<!-- updated: 2026-07-20 02:04 -->
+<!-- updated: 2026-07-20 19:22 -->
