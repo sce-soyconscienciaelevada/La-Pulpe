@@ -1,0 +1,397 @@
+// Bar Management Dashboard — schema
+// Local dev: SQLite (file:./dev.db, via prisma.config.ts fallback).
+// Deploy swap: change provider to "postgresql", point BARMGMT_DB_CONN at Neon,
+// swap the adapter in src/lib/prisma.ts from PrismaBetterSqlite3 to PrismaPg
+// (same swap Dolipa Store did — see that project's TECHNICAL-GUIDE.md §7 row 5).
+// Money/quantity fields are Float on SQLite; reconsider Decimal once on Postgres.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ─────────────────────────── Core / Auth ───────────────────────────
+
+model Venue {
+  id        String   @id @default(cuid())
+  name      String
+  timezone  String   @default("America/Argentina/Cordoba")
+  currency  String   @default("ARS")
+  createdAt DateTime @default(now())
+
+  users         User[]
+  people        Person[]
+  categories    Category[]
+  products      Product[]
+  suppliers     Supplier[]
+  businessDays  BusinessDay[]
+  consumptions  Consumption[]
+  reorderItems  ReorderItem[]
+  purchases     Purchase[]
+  adjustments   StockAdjustment[]
+  stockPeriods  StockPeriod[]
+  auditLogs     AuditLog[]
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  STAFF
+}
+
+model User {
+  id           String   @id @default(cuid())
+  venueId      String
+  venue        Venue    @relation(fields: [venueId], references: [id])
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(OWNER)
+  createdAt    DateTime @default(now())
+
+  auditLogs AuditLog[]
+
+  @@index([venueId])
+}
+
+enum PersonKind {
+  OWNER
+  STAFF
+  BAND
+}
+
+model Person {
+  id          String     @id @default(cuid())
+  venueId     String
+  venue       Venue      @relation(fields: [venueId], references: [id])
+  name        String
+  kind        PersonKind @default(OWNER)
+  avatarColor String?
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+
+  consumptions Consumption[]
+
+  @@index([venueId])
+}
+
+// ─────────────────────────── Catalog ───────────────────────────
+
+enum CategoryKind {
+  BEVERAGE
+  WINE
+  COFFEE
+  GLASSWARE
+  DISPOSABLE
+  INGREDIENT
+  OTHER
+}
+
+model Category {
+  id        String       @id @default(cuid())
+  venueId   String
+  venue     Venue        @relation(fields: [venueId], references: [id])
+  name      String
+  kind      CategoryKind @default(BEVERAGE)
+  parentId  String?
+  parent    Category?    @relation("CategoryParent", fields: [parentId], references: [id])
+  children  Category[]   @relation("CategoryParent")
+  sortOrder Int          @default(0)
+
+  products  Product[]
+  suppliers Supplier[]   @relation("SupplierCategories")
+
+  @@index([venueId])
+}
+
+enum UnitOfMeasure {
+  ML
+  UNIDAD
+  GRAMOS
+  KG
+}
+
+enum ContainerType {
+  BOTTLE
+  CAN
+  KEG
+  UNIT
+}
+
+enum Carbonation {
+  CON_GAS
+  SIN_GAS
+  NA
+}
+
+model Product {
+  id                    String        @id @default(cuid())
+  venueId               String
+  venue                 Venue         @relation(fields: [venueId], references: [id])
+  categoryId            String
+  category              Category      @relation(fields: [categoryId], references: [id])
+  name                  String
+  unitOfMeasure         UnitOfMeasure @default(ML)
+  containerLabel        String?
+  containerType         ContainerType @default(BOTTLE)
+  servingsPerContainer  Float         @default(1)
+  costPricePerContainer Float         @default(0)
+  salePricePerServing   Float?
+  carbonation           Carbonation   @default(NA)
+  servedInProductId     String?
+  servedIn              Product?      @relation("ServedIn", fields: [servedInProductId], references: [id])
+  servesAs              Product[]     @relation("ServedIn")
+  emoji                 String?
+  colorHex              String?
+  showOnQuickGrid       Boolean       @default(false)
+  quickGridSort         Int?
+  primarySupplierId     String?
+  primarySupplier       Supplier?     @relation(fields: [primarySupplierId], references: [id])
+  isSellable            Boolean       @default(true)
+  isRecipeIngredient    Boolean       @default(false)
+  reorderThreshold      Float?
+  currentStock          Float         @default(0)
+  attributes            String? // JSON-encoded, kept as string for SQLite/Postgres portability
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  priceHistory      ProductPriceHistory[]
+  consumptions      Consumption[]
+  purchases         Purchase[]
+  adjustments       StockAdjustment[]
+  stockCounts       StockCount[]
+  recipe            Recipe?
+  usedInRecipes     RecipeIngredient[]
+
+  @@index([venueId])
+  @@index([categoryId])
+}
+
+enum PriceType {
+  COST
+  SALE
+}
+
+model ProductPriceHistory {
+  id            String    @id @default(cuid())
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id])
+  price         Float
+  priceType     PriceType
+  effectiveDate DateTime  @default(now())
+
+  @@index([productId])
+}
+
+model Supplier {
+  id           String     @id @default(cuid())
+  venueId      String
+  venue        Venue      @relation(fields: [venueId], references: [id])
+  name         String
+  contactPhone String?
+  contactNote  String?
+  createdAt    DateTime   @default(now())
+
+  categories       Category[]    @relation("SupplierCategories")
+  primaryProducts  Product[]
+  reorderItems     ReorderItem[]
+  purchases        Purchase[]
+
+  @@index([venueId])
+}
+
+// ─────────────────────────── Daily register ───────────────────────────
+
+enum BusinessDayStatus {
+  OPEN
+  CLOSED
+}
+
+model BusinessDay {
+  id       String            @id @default(cuid())
+  venueId  String
+  venue    Venue             @relation(fields: [venueId], references: [id])
+  date     DateTime
+  status   BusinessDayStatus @default(OPEN)
+  openedAt DateTime          @default(now())
+  closedAt DateTime?
+
+  consumptions Consumption[]
+  reorderItems ReorderItem[]
+
+  @@unique([venueId, date])
+}
+
+enum ConsumptionType {
+  SALE
+  OWNER
+  COMP
+  BAND_ALLOWANCE
+}
+
+model Consumption {
+  id               String          @id @default(cuid())
+  venueId          String
+  venue            Venue           @relation(fields: [venueId], references: [id])
+  businessDayId    String
+  businessDay      BusinessDay     @relation(fields: [businessDayId], references: [id])
+  productId        String?
+  product          Product?        @relation(fields: [productId], references: [id])
+  freeText         String?
+  type             ConsumptionType @default(SALE)
+  quantity         Float           @default(1)
+  personId         String?
+  person           Person?         @relation(fields: [personId], references: [id])
+  unitPriceCharged Float           @default(0)
+  unitCost         Float           @default(0)
+  createdAt        DateTime        @default(now())
+
+  @@index([venueId])
+  @@index([businessDayId])
+  @@index([productId])
+}
+
+enum ReorderStatus {
+  PENDIENTE
+  PEDIDO
+  RECIBIDO
+}
+
+model ReorderItem {
+  id            String        @id @default(cuid())
+  venueId       String
+  venue         Venue         @relation(fields: [venueId], references: [id])
+  businessDayId String?
+  businessDay   BusinessDay?  @relation(fields: [businessDayId], references: [id])
+  supplierId    String?
+  supplier      Supplier?     @relation(fields: [supplierId], references: [id])
+  supplierLabel String?
+  name          String
+  quantity      Float         @default(1)
+  status        ReorderStatus @default(PENDIENTE)
+  createdAt     DateTime      @default(now())
+
+  @@index([venueId])
+}
+
+// ─────────────────────────── Stock ledger ───────────────────────────
+
+model Purchase {
+  id            String       @id @default(cuid())
+  venueId       String
+  venue         Venue        @relation(fields: [venueId], references: [id])
+  stockPeriodId String?
+  stockPeriod   StockPeriod? @relation(fields: [stockPeriodId], references: [id])
+  productId     String
+  product       Product      @relation(fields: [productId], references: [id])
+  supplierId    String?
+  supplier      Supplier?    @relation(fields: [supplierId], references: [id])
+  quantity      Float
+  unitCost      Float
+  invoiceRef    String?
+  purchaseDate  DateTime     @default(now())
+
+  @@index([venueId])
+  @@index([productId])
+}
+
+enum StockAdjustmentReason {
+  BREAKAGE
+  WASTE
+  RECOUNT_CORRECTION
+  PERIOD_CLOSE_RECONCILE
+  OTHER
+}
+
+model StockAdjustment {
+  id            String                 @id @default(cuid())
+  venueId       String
+  venue         Venue                  @relation(fields: [venueId], references: [id])
+  productId     String
+  product       Product                @relation(fields: [productId], references: [id])
+  quantityDelta Float
+  reason        StockAdjustmentReason
+  note          String?
+  createdAt     DateTime               @default(now())
+
+  @@index([venueId])
+  @@index([productId])
+}
+
+enum StockPeriodStatus {
+  OPEN
+  CLOSED
+}
+
+model StockPeriod {
+  id        String            @id @default(cuid())
+  venueId   String
+  venue     Venue             @relation(fields: [venueId], references: [id])
+  label     String
+  startDate DateTime          @default(now())
+  endDate   DateTime?
+  status    StockPeriodStatus @default(OPEN)
+  closedAt  DateTime?
+
+  counts    StockCount[]
+  purchases Purchase[]
+
+  @@index([venueId])
+}
+
+model StockCount {
+  id                     String      @id @default(cuid())
+  stockPeriodId          String
+  stockPeriod            StockPeriod @relation(fields: [stockPeriodId], references: [id])
+  productId              String
+  product                Product     @relation(fields: [productId], references: [id])
+  initialQuantity        Float       @default(0)
+  expectedFinalQuantity  Float?
+  countedFinalQuantity   Float?
+  variance               Float?
+
+  @@unique([stockPeriodId, productId])
+}
+
+// ─────────────────────────── Recipes ───────────────────────────
+
+model Recipe {
+  id             String   @id @default(cuid())
+  productId      String   @unique
+  product        Product  @relation(fields: [productId], references: [id])
+  yieldServings  Float    @default(1)
+
+  ingredients RecipeIngredient[]
+}
+
+model RecipeIngredient {
+  id                  String        @id @default(cuid())
+  recipeId            String
+  recipe              Recipe        @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredientProductId String
+  ingredientProduct   Product       @relation(fields: [ingredientProductId], references: [id])
+  quantity            Float
+  uom                 UnitOfMeasure @default(ML)
+
+  @@index([recipeId])
+}
+
+// ─────────────────────────── Audit ───────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  venueId    String
+  venue      Venue    @relation(fields: [venueId], references: [id])
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String
+  entityType String?
+  entityId   String?
+  meta       String? // JSON-encoded
+  createdAt  DateTime @default(now())
+
+  @@index([venueId])
+}

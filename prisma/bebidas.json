@@ -1,0 +1,618 @@
+[
+  {
+    "section": "sin_alcohol",
+    "name": "TONICA",
+    "containerMl": 1500.0,
+    "costPricePerContainer": 85.0,
+    "servingsPerContainer": 4.8387
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "LATA COCA",
+    "containerMl": 310.0,
+    "costPricePerContainer": 29.87,
+    "servingsPerContainer": 155.0
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "COCA",
+    "containerMl": 1500.0,
+    "costPricePerContainer": 84.0,
+    "servingsPerContainer": 750.0
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "COCA ZERO",
+    "containerMl": 1500.0,
+    "costPricePerContainer": 84.0,
+    "servingsPerContainer": 750.0
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "SPRITE",
+    "containerMl": 1500.0,
+    "costPricePerContainer": 84.0,
+    "servingsPerContainer": 750.0
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "LATA COCA ZERO",
+    "containerMl": null,
+    "costPricePerContainer": 29.87,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "LATA SPRITE",
+    "containerMl": null,
+    "costPricePerContainer": 29.87,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "LATA SPRITE ZERO",
+    "containerMl": null,
+    "costPricePerContainer": 29.87,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "LATA FANTA",
+    "containerMl": null,
+    "costPricePerContainer": 29.87,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "LATA TONICA",
+    "containerMl": null,
+    "costPricePerContainer": 29.87,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "AGUA SIN GAS",
+    "containerMl": null,
+    "costPricePerContainer": 28.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "SABORIZADA MANZANA",
+    "containerMl": null,
+    "costPricePerContainer": 28.74,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "SABORIZADA POMELO",
+    "containerMl": null,
+    "costPricePerContainer": 28.74,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "SABORIZADA PERA",
+    "containerMl": null,
+    "costPricePerContainer": 28.74,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "SABORIZADA NARANJA",
+    "containerMl": null,
+    "costPricePerContainer": 28.74,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "sin_alcohol",
+    "name": "SPEED",
+    "containerMl": null,
+    "costPricePerContainer": 30.25,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "con_alcohol",
+    "name": "RON 7 AÑOS",
+    "containerMl": 750.0,
+    "costPricePerContainer": 907.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "RON CARTA BLANCA",
+    "containerMl": 750.0,
+    "costPricePerContainer": 339.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "MALIBU",
+    "containerMl": 750.0,
+    "costPricePerContainer": 419.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "SMIRNOFF REGULAR",
+    "containerMl": 700.0,
+    "costPricePerContainer": 265.0,
+    "servingsPerContainer": 11.6667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "SMIRNOFF SABORIZADO",
+    "containerMl": 700.0,
+    "costPricePerContainer": 265.0,
+    "servingsPerContainer": 11.6667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "CACHAZA",
+    "containerMl": 1000.0,
+    "costPricePerContainer": 271.0,
+    "servingsPerContainer": 16.6667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "FERNET",
+    "containerMl": 750.0,
+    "costPricePerContainer": 323.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "RON DORADO",
+    "containerMl": 750.0,
+    "costPricePerContainer": 492.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "CAMPARI",
+    "containerMl": 750.0,
+    "costPricePerContainer": 250.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "GANCIA",
+    "containerMl": 950.0,
+    "costPricePerContainer": 105.0,
+    "servingsPerContainer": 15.8333
+  },
+  {
+    "section": "con_alcohol",
+    "name": "APEROL",
+    "containerMl": 750.0,
+    "costPricePerContainer": 340.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "VERMUTH ROSSO",
+    "containerMl": 1000.0,
+    "costPricePerContainer": 149.0,
+    "servingsPerContainer": 16.6667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "CUANTREAU",
+    "containerMl": 750.0,
+    "costPricePerContainer": 1610.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "LICOR DRAMBUIE",
+    "containerMl": 750.0,
+    "costPricePerContainer": 1609.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "LICOR DISARONNO",
+    "containerMl": 750.0,
+    "costPricePerContainer": 1338.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "AMARULA",
+    "containerMl": 750.0,
+    "costPricePerContainer": 1040.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "JACK DANIELS",
+    "containerMl": 750.0,
+    "costPricePerContainer": 1970.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "JACK DANIELS HONEY",
+    "containerMl": 750.0,
+    "costPricePerContainer": 2075.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "JIN BEAM",
+    "containerMl": 750.0,
+    "costPricePerContainer": 967.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "JOHNNY RED",
+    "containerMl": 1000.0,
+    "costPricePerContainer": 934.0,
+    "servingsPerContainer": 16.6667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "JOHNNY BLACK",
+    "containerMl": 1000.0,
+    "costPricePerContainer": 1597.0,
+    "servingsPerContainer": 16.6667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "JAMESON",
+    "containerMl": 750.0,
+    "costPricePerContainer": 743.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "CHIVAS",
+    "containerMl": 750.0,
+    "costPricePerContainer": null,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "TEQUILA",
+    "containerMl": 700.0,
+    "costPricePerContainer": 902.0,
+    "servingsPerContainer": 11.6667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "BALLANTINES",
+    "containerMl": 1000.0,
+    "costPricePerContainer": 635.0,
+    "servingsPerContainer": 16.6667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "JAGGER",
+    "containerMl": 1750.0,
+    "costPricePerContainer": 2585.0,
+    "servingsPerContainer": 29.1667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "BAILEYS",
+    "containerMl": 750.0,
+    "costPricePerContainer": 802.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "ABSOLUT REGULAR",
+    "containerMl": 750.0,
+    "costPricePerContainer": 697.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "ABSOLUT SABORIZADO",
+    "containerMl": 750.0,
+    "costPricePerContainer": 697.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "CYNAR",
+    "containerMl": 750.0,
+    "costPricePerContainer": null,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "MISTRAL",
+    "containerMl": 750.0,
+    "costPricePerContainer": 547.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "GORDONS",
+    "containerMl": 700.0,
+    "costPricePerContainer": 370.0,
+    "servingsPerContainer": 11.6667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "APOSTOLES",
+    "containerMl": 700.0,
+    "costPricePerContainer": 440.0,
+    "servingsPerContainer": 11.6667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "BOMBAY",
+    "containerMl": 750.0,
+    "costPricePerContainer": 1439.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "BEEFEATER",
+    "containerMl": 1000.0,
+    "costPricePerContainer": 881.0,
+    "servingsPerContainer": 16.6667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "BEEFEATER PINK",
+    "containerMl": 750.0,
+    "costPricePerContainer": 606.21,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "TANQUERAY",
+    "containerMl": 750.0,
+    "costPricePerContainer": 747.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "ALQUIMISTA",
+    "containerMl": 500.0,
+    "costPricePerContainer": null,
+    "servingsPerContainer": 8.3333
+  },
+  {
+    "section": "con_alcohol",
+    "name": "RESTINGA",
+    "containerMl": 750.0,
+    "costPricePerContainer": null,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "HENDRICKS",
+    "containerMl": 1000.0,
+    "costPricePerContainer": 2405.0,
+    "servingsPerContainer": 16.6667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "BULL DOG",
+    "containerMl": 700.0,
+    "costPricePerContainer": null,
+    "servingsPerContainer": 11.6667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "GIN MARE",
+    "containerMl": 1000.0,
+    "costPricePerContainer": null,
+    "servingsPerContainer": 16.6667
+  },
+  {
+    "section": "con_alcohol",
+    "name": "HEREDERO",
+    "containerMl": 750.0,
+    "costPricePerContainer": null,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "con_alcohol",
+    "name": "COVENT",
+    "containerMl": 750.0,
+    "costPricePerContainer": 690.0,
+    "servingsPerContainer": 12.5
+  },
+  {
+    "section": "cervezas",
+    "name": "MILLER 330",
+    "containerMl": null,
+    "costPricePerContainer": 49.75,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "cervezas",
+    "name": "AMBER",
+    "containerMl": null,
+    "costPricePerContainer": 105.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "cervezas",
+    "name": "STOUT",
+    "containerMl": null,
+    "costPricePerContainer": 105.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "cervezas",
+    "name": "APA",
+    "containerMl": null,
+    "costPricePerContainer": 105.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "cervezas",
+    "name": "IPA",
+    "containerMl": null,
+    "costPricePerContainer": 105.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "cervezas",
+    "name": "SOL 330",
+    "containerMl": null,
+    "costPricePerContainer": 69.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "cervezas",
+    "name": "HEINEKEN 330",
+    "containerMl": null,
+    "costPricePerContainer": 50.3,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "cervezas",
+    "name": "GROLSCH 330",
+    "containerMl": null,
+    "costPricePerContainer": 60.55,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "cervezas",
+    "name": "IPA TIRADA",
+    "containerMl": 30000.0,
+    "costPricePerContainer": 5733.0,
+    "servingsPerContainer": 60.0
+  },
+  {
+    "section": "cervezas",
+    "name": "CREAM STOUT TIRADA",
+    "containerMl": 30000.0,
+    "costPricePerContainer": 4429.75,
+    "servingsPerContainer": 60.0
+  },
+  {
+    "section": "cervezas",
+    "name": "AMBER LAGER TIRADA",
+    "containerMl": 30000.0,
+    "costPricePerContainer": 4429.75,
+    "servingsPerContainer": 60.0
+  },
+  {
+    "section": "vinos",
+    "name": "BARON B EXTRA BRUT",
+    "containerMl": null,
+    "costPricePerContainer": 625.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "BARON B BRUT NATURE",
+    "containerMl": null,
+    "costPricePerContainer": 675.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "CHANDON BRUT NATURE",
+    "containerMl": null,
+    "costPricePerContainer": 320.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "CHANDON EXTRA BRUT",
+    "containerMl": null,
+    "costPricePerContainer": 273.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "CHANDON DELICE",
+    "containerMl": null,
+    "costPricePerContainer": 273.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "CHANDON APERITIF",
+    "containerMl": null,
+    "costPricePerContainer": 273.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "CHANDON ROSE",
+    "containerMl": null,
+    "costPricePerContainer": 273.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "CHANDON 187",
+    "containerMl": null,
+    "costPricePerContainer": 60.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "SANTA JULIA MALBEC",
+    "containerMl": null,
+    "costPricePerContainer": 121.66,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "SANTA JULIA CHENIN",
+    "containerMl": null,
+    "costPricePerContainer": 146.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "SANTA JULIA DULCE TINTO",
+    "containerMl": null,
+    "costPricePerContainer": 156.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "ALAMBRADO MALBEC",
+    "containerMl": null,
+    "costPricePerContainer": 233.0,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "ABSURDO TORRENTES",
+    "containerMl": null,
+    "costPricePerContainer": null,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "ABSURDO CHARDONNAY",
+    "containerMl": null,
+    "costPricePerContainer": null,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "ABSURDO MALBEC",
+    "containerMl": null,
+    "costPricePerContainer": null,
+    "servingsPerContainer": 1.0
+  },
+  {
+    "section": "vinos",
+    "name": "MERCIER",
+    "containerMl": 750.0,
+    "costPricePerContainer": 190.0,
+    "servingsPerContainer": 5.0
+  },
+  {
+    "section": "vinos",
+    "name": "VEUVE C",
+    "containerMl": 750.0,
+    "costPricePerContainer": 3500.0,
+    "servingsPerContainer": 5.0
+  }
+]

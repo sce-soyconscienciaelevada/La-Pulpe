@@ -1,0 +1,17 @@
+import { requireAdmin } from "@/lib/require-admin";
+import { prisma } from "@/lib/prisma";
+import { Sidebar } from "@/components/Sidebar";
+
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const user = await requireAdmin();
+  const venue = await prisma.venue.findFirst();
+
+  return (
+    <div className="min-h-screen flex bg-bg">
+      <Sidebar venueName={venue?.name ?? "Bar"} userEmail={user.email ?? ""} />
+      <main className="flex-1 min-w-0 overflow-x-hidden">
+        <div className="max-w-6xl mx-auto p-4 sm:p-6">{children}</div>
+      </main>
+    </div>
+  );
+}
