@@ -260,6 +260,55 @@ async function main() {
     });
   }
 
+  // ── Cristalería y Vajilla (from Pablo's real paper control sheet) ──
+  const glasswareItems: {
+    code: string;
+    name: string;
+    location: "BARRA" | "DEPOSITO";
+    stockBase: number;
+  }[] = [
+    { code: "BAR-001", name: "Vaso Bristol", location: "BARRA", stockBase: 0 },
+    { code: "BAR-002", name: "Vaso Bristol Brindis", location: "BARRA", stockBase: 0 },
+    { code: "BAR-003", name: "Vaso Trago Largo", location: "BARRA", stockBase: 0 },
+    { code: "BAR-004", name: "Chupinos", location: "BARRA", stockBase: 0 },
+    { code: "BAR-005", name: "Jarras", location: "BARRA", stockBase: 0 },
+    { code: "BAR-006", name: "Copa de Vino (tintos / blancos / tragos)", location: "BARRA", stockBase: 0 },
+    { code: "BAR-007", name: "Copa Gin", location: "BARRA", stockBase: 0 },
+    { code: "BAR-008", name: "Copa Gin Blu", location: "BARRA", stockBase: 0 },
+    { code: "BAR-009", name: "Copa Carpano", location: "BARRA", stockBase: 0 },
+    { code: "BAR-010", name: "Copa Martini", location: "BARRA", stockBase: 0 },
+    { code: "BAR-011", name: "Copa Hurricane", location: "BARRA", stockBase: 0 },
+    { code: "BAR-012", name: "Copa Champagne", location: "BARRA", stockBase: 0 },
+    { code: "BAR-013", name: "Tazas", location: "BARRA", stockBase: 0 },
+    { code: "BAR-014", name: "Jarritos", location: "BARRA", stockBase: 0 },
+    { code: "BAR-015", name: "Chicos", location: "BARRA", stockBase: 0 },
+    { code: "BAR-016", name: "Tetera", location: "BARRA", stockBase: 0 },
+    { code: "DEP-001", name: "Copa Carpano", location: "DEPOSITO", stockBase: 6 },
+    { code: "DEP-002", name: "Copones de Vino", location: "DEPOSITO", stockBase: 108 },
+    { code: "DEP-003", name: "Copas de Champagne", location: "DEPOSITO", stockBase: 132 },
+    { code: "DEP-004", name: "Copas de Gin", location: "DEPOSITO", stockBase: 24 },
+    { code: "DEP-005", name: "Jarras", location: "DEPOSITO", stockBase: 24 },
+    { code: "DEP-006", name: "Copas Old Fashion", location: "DEPOSITO", stockBase: 18 },
+    { code: "DEP-007", name: "Jarros", location: "DEPOSITO", stockBase: 6 },
+    { code: "DEP-008", name: "Chicos", location: "DEPOSITO", stockBase: 6 },
+  ];
+  for (const [i, g] of glasswareItems.entries()) {
+    await prisma.glasswareItem.upsert({
+      where: { id: `glass-${slug(g.code)}` },
+      update: {},
+      create: {
+        id: `glass-${slug(g.code)}`,
+        venueId: venue.id,
+        code: g.code,
+        name: g.name,
+        location: g.location,
+        stockBase: g.stockBase,
+        sortOrder: i,
+      },
+    });
+  }
+  console.log(`  ${glasswareItems.length} glassware items seeded (Barra + Depósito)`);
+
   console.log("Seed complete.");
   console.log(`  Admin login: pablo@lapulpe.local / cambiar123 (CHANGE before real handoff)`);
 }

@@ -2,6 +2,9 @@ import { chromium } from "playwright";
 import { prisma } from "../src/lib/prisma";
 
 const BASE = "http://localhost:3000";
+// Never hardcode the real admin password here -- this repo is public.
+// Export BARMGMT_TEST_PASSWORD before running against a DB where it's been rotated.
+const TEST_PASSWORD = process.env["BARMGMT_TEST_PASSWORD"] || "cambiar123";
 let checks = 0;
 let failures = 0;
 function ok(label: string, cond: boolean, detail?: string) {
@@ -20,7 +23,7 @@ async function main() {
 
   await page.goto(`${BASE}/login`, { waitUntil: "networkidle" });
   await page.fill("#email", "pablo@lapulpe.local");
-  await page.fill("#password", "DzTeCN7jl5y5Sp9-");
+  await page.fill("#password", TEST_PASSWORD);
   await page.click('button[type="submit"]');
   await page.waitForURL(`${BASE}/`, { timeout: 15000 });
 

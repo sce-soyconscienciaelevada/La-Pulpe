@@ -35,6 +35,9 @@ model Venue {
   adjustments   StockAdjustment[]
   stockPeriods  StockPeriod[]
   auditLogs     AuditLog[]
+  glasswareItems        GlasswareItem[]
+  glasswareMonthPeriods GlasswareMonthPeriod[]
+  feedbackItems         FeedbackItem[]
 }
 
 enum UserRole {
@@ -392,6 +395,115 @@ model AuditLog {
   entityId   String?
   meta       String? // JSON-encoded
   createdAt  DateTime @default(now())
+
+  @@index([venueId])
+}
+
+// ─────────────────────────── Cristalería y Vajilla ───────────────────────────
+// Separate from Product/StockPeriod on purpose: this tracks glassware/tableware
+// par-level counts by physical location (Barra vs Depósito), one printable
+// sheet per month with every week of that month shown side by side — a
+// different workflow from the bottle/spirit stock ledger, matching Pablo's
+// existing paper "Control Semanal de Stock" sheet.
+
+enum GlasswareLocation {
+  BARRA
+  DEPOSITO
+}
+
+model GlasswareItem {
+  id         String            @id @default(cuid())
+  venueId    String
+  venue      Venue             @relation(fields: [venueId], references: [id])
+  code       String
+  name       String
+  location   GlasswareLocation
+  stockBase  Float             @default(0)
+  sortOrder  Int               @default(0)
+  isActive   Boolean           @default(true)
+  createdAt  DateTime          @default(now())
+
+  counts GlasswareCount[]
+
+  @@index([venueId])
+}
+
+enum GlasswareMonthStatus {
+  OPEN
+  CLOSED
+}
+
+model GlasswareMonthPeriod {
+  id        String               @id @default(cuid())
+  venueId   String
+  venue     Venue                @relation(fields: [venueId], references: [id])
+  label     String
+  status    GlasswareMonthStatus @default(OPEN)
+  startDate DateTime             @default(now())
+  closedAt  DateTime?
+
+  weeks GlasswareWeekEntry[]
+
+  @@index([venueId])
+}
+
+model GlasswareWeekEntry {
+  id            String               @id @default(cuid())
+  monthPeriodId String
+  monthPeriod   GlasswareMonthPeriod @relation(fields: [monthPeriodId], references: [id])
+  weekNumber    Int
+  label         String
+  createdAt     DateTime             @default(now())
+
+  counts GlasswareCount[]
+
+  @@unique([monthPeriodId, weekNumber])
+}
+
+model GlasswareCount {
+  id             String              @id @default(cuid())
+  weekEntryId    String
+  weekEntry      GlasswareWeekEntry  @relation(fields: [weekEntryId], references: [id], onDelete: Cascade)
+  itemId         String
+  item           GlasswareItem       @relation(fields: [itemId], references: [id])
+  countedQuantity Float
+
+  @@unique([weekEntryId, itemId])
+}
+
+// ─────────────────────────── Feedback ───────────────────────────
+// Pablo's channel for bugs/feature requests/workarounds back to Joan. Status
+// (NEW/IN_PROGRESS/DONE/WONT_FIX) doubles as the running log of what's been
+// asked for, what's being worked on, and what hasn't been touched yet — no
+// separate log file to keep in sync.
+
+enum FeedbackType {
+  BUG
+  FEATURE_REQUEST
+  WORKAROUND
+  QUESTION
+  OTHER
+}
+
+enum FeedbackStatus {
+  NEW
+  IN_PROGRESS
+  DONE
+  WONT_FIX
+}
+
+model FeedbackItem {
+  id           String         @id @default(cuid())
+  venueId      String
+  venue        Venue          @relation(fields: [venueId], references: [id])
+  type         FeedbackType
+  title        String
+  description  String
+  status       FeedbackStatus @default(NEW)
+  submittedBy  String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  resolvedAt   DateTime?
 
   @@index([venueId])
 }

@@ -10,6 +10,7 @@ const NAV = [
   { href: "/inventario", label: "Inventario", icon: "📦" },
   { href: "/registro", label: "Registro diario", icon: "🍸" },
   { href: "/stock", label: "Stock semanal", icon: "📋" },
+  { href: "/cristaleria", label: "Cristalería y Vajilla", icon: "🥂" },
   { href: "/compras", label: "Compras & Pedidos", icon: "🚚" },
   { href: "/productos", label: "Productos", icon: "🏷️" },
   { href: "/costeo", label: "Costeo & Recetas", icon: "🧪" },
@@ -17,6 +18,7 @@ const NAV = [
   { href: "/proveedores", label: "Proveedores", icon: "🤝" },
   { href: "/reportes", label: "Reportes", icon: "🖨️" },
   { href: "/estadisticas", label: "Estadísticas", icon: "📈" },
+  { href: "/feedback", label: "Feedback", icon: "💬" },
   { href: "/ajustes", label: "Ajustes", icon: "⚙️" },
 ];
 

@@ -1,9 +1,25 @@
 import { chromium } from "playwright";
 
 const BASE = "http://localhost:3000";
+// Never hardcode the real admin password here -- this repo is public.
+const TEST_PASSWORD = process.env["BARMGMT_TEST_PASSWORD"] || "cambiar123";
 const errors: string[] = [];
 let checks = 0;
 let failures = 0;
+
+// This script MUTATES data (fake products, fake sales, force-closes a stock
+// period). There is no separate local dev database anymore -- SQLite was
+// dropped once this app deployed, so BARMGMT_DB_CONN always points at the
+// real Neon database, local runs included. Refuse to run unless the caller
+// explicitly confirms they mean to mutate whatever DB is currently
+// configured. Use verify-prod-readonly.ts instead for a safe live check.
+if (process.env["CONFIRM_MUTATE_DB"] !== "yes") {
+  console.error(
+    "Refusing to run: this script mutates real data. Set CONFIRM_MUTATE_DB=yes " +
+      "only if you're certain BARMGMT_DB_CONN does NOT point at Pablo's live data."
+  );
+  process.exit(1);
+}
 
 function ok(label: string, cond: boolean, detail?: string) {
   checks++;
@@ -31,7 +47,7 @@ async function main() {
   console.log("== Login ==");
   await page.goto(`${BASE}/login`);
   await page.fill("#email", "pablo@lapulpe.local");
-  await page.fill("#password", "cambiar123");
+  await page.fill("#password", TEST_PASSWORD);
   await page.click('button[type="submit"]');
   await page.waitForURL(`${BASE}/`, { timeout: 10000 });
   ok("Redirected to / after login", page.url() === `${BASE}/`);

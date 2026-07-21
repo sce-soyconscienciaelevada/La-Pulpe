@@ -1,8 +1,15 @@
 import { chromium } from "playwright";
 
 const BASE = "https://la-pulpe-three.vercel.app";
+// Never hardcode the real admin password here -- this repo is public.
+// Export BARMGMT_TEST_PASSWORD (the current prod password) before running this.
+const TEST_PASSWORD = process.env["BARMGMT_TEST_PASSWORD"];
 
 async function main() {
+  if (!TEST_PASSWORD) {
+    console.error("Set BARMGMT_TEST_PASSWORD to the current prod admin password before running this.");
+    process.exit(1);
+  }
   const browser = await chromium.launch();
   const page = await browser.newPage();
   const errors: string[] = [];
@@ -13,14 +20,14 @@ async function main() {
 
   await page.goto(`${BASE}/login`, { waitUntil: "networkidle" });
   await page.fill("#email", "pablo@lapulpe.local");
-  await page.fill("#password", "cambiar123");
+  await page.fill("#password", TEST_PASSWORD);
   await page.click('button[type="submit"]');
   await page.waitForURL(`${BASE}/`, { timeout: 15000 });
   console.log("Login OK, landed on:", page.url());
 
   const routes = [
-    "/", "/inventario", "/registro", "/stock", "/compras", "/productos",
-    "/costeo", "/precios", "/proveedores", "/reportes", "/estadisticas", "/ajustes",
+    "/", "/inventario", "/registro", "/stock", "/cristaleria", "/compras", "/productos",
+    "/costeo", "/precios", "/proveedores", "/reportes", "/estadisticas", "/feedback", "/ajustes",
   ];
   for (const r of routes) {
     const res = await page.goto(`${BASE}${r}`, { waitUntil: "networkidle" });
