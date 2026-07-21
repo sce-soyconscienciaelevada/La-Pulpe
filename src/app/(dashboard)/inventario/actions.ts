@@ -34,3 +34,71 @@ export async function quickRemoveStock(
   revalidatePath("/inventario");
   revalidatePath("/");
 }
+
+export async function createProductQuick(input: {
+  name: string;
+  categoryId: string;
+  containerLabel: string;
+  servingsPerContainer: number;
+  costPricePerContainer: number;
+}) {
+  await requireAdmin();
+  if (!input.name.trim() || !input.categoryId) return;
+  const category = await prisma.category.findUniqueOrThrow({ where: { id: input.categoryId } });
+  await prisma.product.create({
+    data: {
+      venueId: category.venueId,
+      categoryId: input.categoryId,
+      name: input.name.trim(),
+      containerLabel: input.containerLabel.trim() || null,
+      servingsPerContainer: input.servingsPerContainer || 1,
+      costPricePerContainer: input.costPricePerContainer || 0,
+      isSellable: true,
+      isRecipeIngredient: true,
+      currentStock: 0,
+    },
+  });
+  revalidatePath("/inventario");
+  revalidatePath("/productos");
+  revalidatePath("/precios");
+  revalidatePath("/costeo");
+}
+
+export async function deleteProductFromInventario(productId: string) {
+  await requireAdmin();
+
+  const [consumptionCount, purchaseCount, recipeUseCount, hasOwnRecipe] = await Promise.all([
+    prisma.consumption.count({ where: { productId } }),
+    prisma.purchase.count({ where: { productId } }),
+    prisma.recipeIngredient.count({ where: { ingredientProductId: productId } }),
+    prisma.recipe.findUnique({ where: { productId } }),
+  ]);
+
+  if (consumptionCount > 0 || purchaseCount > 0) {
+    return {
+      error:
+        "No se puede eliminar: tiene ventas o compras registradas. Editalo en Productos y marcalo como no vendible en vez de borrarlo.",
+    };
+  }
+  if (recipeUseCount > 0) {
+    return { error: "No se puede eliminar: se usa como ingrediente en una o más recetas." };
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.stockCount.deleteMany({ where: { productId } });
+    await tx.productPriceHistory.deleteMany({ where: { productId } });
+    await tx.stockAdjustment.deleteMany({ where: { productId } });
+    if (hasOwnRecipe) {
+      await tx.recipe.delete({ where: { productId } });
+    }
+    await tx.product.delete({ where: { id: productId } });
+  });
+
+  revalidatePath("/inventario");
+  revalidatePath("/productos");
+  revalidatePath("/precios");
+  revalidatePath("/costeo");
+  revalidatePath("/stock");
+  revalidatePath("/");
+  return { success: true };
+}

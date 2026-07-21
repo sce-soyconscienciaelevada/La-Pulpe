@@ -9,6 +9,10 @@ export default async function InventarioPage() {
     include: { category: true },
     orderBy: [{ category: { sortOrder: "asc" } }, { name: "asc" }],
   });
+  const categories = await prisma.category.findMany({
+    where: { venueId: venue.id },
+    orderBy: { sortOrder: "asc" },
+  });
 
   const rows = products.map((p) => ({
     id: p.id,
@@ -18,6 +22,7 @@ export default async function InventarioPage() {
     currentStock: p.currentStock,
     reorderThreshold: p.reorderThreshold,
     categoryName: p.category.name,
+    categoryId: p.categoryId,
   }));
 
   return (
@@ -26,7 +31,10 @@ export default async function InventarioPage() {
         title="Inventario"
         subtitle={`${products.length} productos — stock en vivo, ajustá con +/− sin abrir un período`}
       />
-      <InventarioList products={rows} />
+      <InventarioList
+        products={rows}
+        categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+      />
     </div>
   );
 }
