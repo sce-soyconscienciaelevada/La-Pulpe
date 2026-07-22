@@ -14,6 +14,7 @@ const NAV = [
   { href: "/compras", label: "Compras & Pedidos", icon: "🚚" },
   { href: "/productos", label: "Productos", icon: "🏷️" },
   { href: "/costeo", label: "Costeo & Recetas", icon: "🧪" },
+  { href: "/recetario", label: "Recetario", icon: "📖" },
   { href: "/precios", label: "Precios & Rentabilidad", icon: "💰" },
   { href: "/proveedores", label: "Proveedores", icon: "🤝" },
   { href: "/reportes", label: "Reportes", icon: "🖨️" },

@@ -367,6 +367,15 @@ model Recipe {
   product        Product  @relation(fields: [productId], references: [id])
   yieldServings  Float    @default(1)
 
+  // Ficha técnica (Recetario) — presentational detail on top of the cost
+  // recipe above. Photo is a pasted URL for v1 (device upload needs Vercel
+  // Blob, not wired yet — see TECHNICAL-GUIDE.md).
+  photoUrl           String?
+  description        String?
+  preparationSteps   String?
+  garnish            String?
+  glassLabel         String?
+
   ingredients RecipeIngredient[]
 }
 
