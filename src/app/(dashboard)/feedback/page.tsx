@@ -24,6 +24,7 @@ export default async function FeedbackPage() {
           status: i.status,
           submittedBy: i.submittedBy,
           createdAt: i.createdAt.toISOString(),
+          screenshotDataUrl: i.screenshotDataUrl,
         }))}
       />
     </div>

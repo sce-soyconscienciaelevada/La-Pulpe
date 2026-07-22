@@ -502,17 +502,18 @@ enum FeedbackStatus {
 }
 
 model FeedbackItem {
-  id           String         @id @default(cuid())
-  venueId      String
-  venue        Venue          @relation(fields: [venueId], references: [id])
-  type         FeedbackType
-  title        String
-  description  String
-  status       FeedbackStatus @default(NEW)
-  submittedBy  String?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  resolvedAt   DateTime?
+  id                String         @id @default(cuid())
+  venueId           String
+  venue             Venue          @relation(fields: [venueId], references: [id])
+  type              FeedbackType
+  title             String
+  description       String
+  status            FeedbackStatus @default(NEW)
+  submittedBy       String?
+  screenshotDataUrl String? // base64 data: URI, client-compressed before upload -- no Blob storage wired yet
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  resolvedAt        DateTime?
 
   @@index([venueId])
 }

@@ -10,6 +10,7 @@ export async function createFeedback(input: {
   type: FeedbackType;
   title: string;
   description: string;
+  screenshotDataUrl?: string;
 }) {
   const user = await requireAdmin();
   if (!input.title.trim() || !input.description.trim()) return;
@@ -22,6 +23,7 @@ export async function createFeedback(input: {
       title: input.title.trim(),
       description: input.description.trim(),
       submittedBy: user.email ?? null,
+      screenshotDataUrl: input.screenshotDataUrl || null,
     },
   });
 
