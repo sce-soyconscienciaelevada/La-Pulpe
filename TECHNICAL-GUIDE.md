@@ -43,21 +43,24 @@ Cocktail costing (`src/lib/costeo.ts`) sums each `RecipeIngredient.quantity` (in
 
 **Revenue/profit for a day** (`src/lib/register/day.ts`, `getDaySummary`): `Revenue = Σ SALE-type qty×unitPriceCharged`. `COGS = Σ ALL-type qty×unitCost` — meaning owner drinks and cortesía show up as real cost dragging down `Ganancia`, not as invisible giveaways. `unitCost`/`unitPriceCharged` are snapshotted onto each `Consumption` row at tap time, so historical numbers don't drift if a price changes later.
 
-## 4. The 12 modules
+## 4. The 15 modules
 
 | Module | Route | Core logic |
 |---|---|---|
 | Inicio | `/` | Today's `BusinessDay` summary + top-margin products + low-stock alerts |
-| Inventario | `/inventario` | Live `currentStock` per product, grouped by category, +/− buttons call `recordPurchase`/`recordAdjustment` directly (no period needed) |
+| Inventario | `/inventario` | Live `currentStock` per product, grouped by category, +/− buttons call `recordPurchase`/`recordAdjustment` directly (no period needed). Inline create + guarded delete (refuses if the product has sale/purchase history or is a recipe ingredient) |
 | Registro diario | `/registro` | 5 tabs (Dueños/Consumiciones/Cortesía/Pedido/Resumen) mirroring Pablo's validated mockup's tap-to-count interaction, restyled with this project's own design system. Tap a quick-grid card → `recordConsumption` |
 | Stock semanal | `/stock` | `StockPeriod`/`StockCount` grid — enter counted values, "Cerrar" freezes expected-vs-counted, writes one `PERIOD_CLOSE_RECONCILE` adjustment per variance, rolls counted forward as next period's initial |
+| Cristalería y Vajilla | `/cristaleria` | `GlasswareItem` (Barra/Depósito, 24 real items) × `GlasswareMonthPeriod`/`GlasswareWeekEntry`/`GlasswareCount` — every week of the open month shown side by side, Diferencia = previous week's count minus current (stock base = week 0). "Cerrar mes" archives + rolls to next month. Matches Pablo's real paper sheet; printable PDF mirrors its layout |
 | Compras & Pedidos | `/compras` | Purchase form (`recordPurchase`) + `ReorderItem` status tracker (PENDIENTE→PEDIDO→RECIBIDO) |
 | Productos | `/productos` | Full CRUD, including the quick-grid emoji/color/sort fields |
 | Costeo & Recetas | `/costeo` | Build a `Recipe` from `RecipeIngredient` rows, cost shown live |
+| Recetario | `/recetario` | Ficha técnica per drink — photo (pasted URL), descripción, vaso/copa, guarnición, preparación (steps). Extends the same `Recipe` row Costeo writes to (doesn't duplicate the ingredient editor, links to Costeo for that). Printable A5 PDF per drink with the photo embedded |
 | Precios & Rentabilidad | `/precios` | Sortable (worst-margin-first) per-product profit table, inline price editing |
 | Proveedores | `/proveedores` | Supplier CRUD + category mapping |
-| Reportes | `/reportes` | Links to 4 PDF routes |
+| Reportes | `/reportes` | Links to 6 PDF routes (cierre-día, stock-semanal, rentabilidad, pedido, cristalería; ficha-técnica is linked per-drink from Recetario instead, since it needs a productId) |
 | Estadísticas | `/estadisticas` | Top sellers, consumption mix, 14-day revenue/profit trend — CSS-bar charts, no chart library |
+| Feedback | `/feedback` | Pablo reports bugs/feature-requests/workarounds. `FeedbackItem.status` (Nuevo/En progreso/Resuelto/No se va a hacer) IS the tracking log — no separate file. Fires a best-effort webhook via `src/lib/notify.ts` to `BARMGMT_NOTIFY_HOOK` (silent no-op until set) for a future n8n → Telegram/WhatsApp ping |
 | Ajustes | `/ajustes` | Venue name/currency, category list (read-only), password change |
 
 ## 5. Auth
@@ -106,4 +109,19 @@ Two separate scripts, deliberately not interchangeable:
 - Kitchen/food module (pizzas etc. from the costing Excel) is phase 3, schema-ready via `Category.kind` but no UI.
 - Staff logins (`User.role` beyond OWNER) are schema-ready, not built.
 - `AuditLog` model exists but nothing writes to it yet.
-<!-- updated: 2026-07-20 19:22 -->
+- Recetario photos are pasted URLs, not real device upload — Vercel Blob isn't wired (`vercel integration discover blob` returns no marketplace product, it's dashboard-only). Same limitation Dolipa Store shipped with.
+- Feedback's n8n → Telegram/WhatsApp notification isn't built — n8n MCP wasn't loaded in the session that built it. The app side is ready (`src/lib/notify.ts` posts to `BARMGMT_NOTIFY_HOOK`), just needs the actual n8n workflow.
+- `git push` alone does not reliably trigger a Vercel redeploy (confirmed dead on 2+ pushes) — always follow up with `vercel --prod` from `site/` until this is root-caused.
+- `vercel --prod` fails with a generic upload `fetch failed` on the first attempt most of the time in this dev environment — just retry, it has worked every time so far.
+- After any Prisma schema migration, explicitly `rm -rf src/generated/prisma && npx prisma generate` before restarting the dev server — `migrate dev`'s automatic generate has not reliably refreshed an already-running server's client (new models throw `Cannot read properties of undefined (reading 'findMany')` otherwise).
+
+## 10. Security note — a real credential leak happened here (2026-07-21)
+
+The live admin password was briefly hardcoded in 3 Playwright test scripts and had **already leaked into public git history** from an earlier commit before it was caught (this repo is public — see §7). Response: rotated the password on the live DB immediately, verified the old value dead and the new one working, fixed every script to read from a `BARMGMT_TEST_PASSWORD` env var instead of a literal, and added a hard refusal gate to `verify-app.ts` requiring `CONFIRM_MUTATE_DB=yes` (dropping SQLite removed the last "safe" database to test against — every script now touches the same live data).
+
+**Rules going forward, non-negotiable:**
+- Never write a real password/token/connection-string as a literal in any file in this repo, including scripts, comments, or test fixtures.
+- Test scripts read credentials from `BARMGMT_TEST_PASSWORD` (or similar), always with a harmless fallback (`"cambiar123"`) for scripts safe to run against a fresh/empty DB — never a real value.
+- Before every commit, grep the staged diff for the current real password/secrets as a final check (`git diff --cached | grep -i <value>`) — caught the leak in `verify-inventario-crud.ts`/`verify-new-modules.ts`/`verify-prod-readonly.ts` this way before a *second* leak happened.
+- If a credential is ever found in history again: rotate first, ask Joan about a history scrub (destructive rewrite + force-push) second — never scrub without his explicit go-ahead, and never treat "removed from the working tree" as equivalent to "safe" once a public push has happened.
+<!-- updated: 2026-07-22 12:58 -->
