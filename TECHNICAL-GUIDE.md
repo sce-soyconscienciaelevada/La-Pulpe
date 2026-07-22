@@ -60,7 +60,7 @@ Cocktail costing (`src/lib/costeo.ts`) sums each `RecipeIngredient.quantity` (in
 | Proveedores | `/proveedores` | Supplier CRUD + category mapping |
 | Reportes | `/reportes` | Links to 6 PDF routes (cierre-día, stock-semanal, rentabilidad, pedido, cristalería; ficha-técnica is linked per-drink from Recetario instead, since it needs a productId) |
 | Estadísticas | `/estadisticas` | Top sellers, consumption mix, 14-day revenue/profit trend — CSS-bar charts, no chart library |
-| Feedback | `/feedback` | Pablo reports bugs/feature-requests/workarounds. `FeedbackItem.status` (Nuevo/En progreso/Resuelto/No se va a hacer) IS the tracking log — no separate file. Fires a best-effort webhook via `src/lib/notify.ts` to `BARMGMT_NOTIFY_HOOK` (silent no-op until set) for a future n8n → Telegram/WhatsApp ping |
+| Feedback | `/feedback` | Pablo reports bugs/feature-requests/workarounds, can paste a screenshot (Ctrl+V, client-compressed, stored as an encoded image string on `FeedbackItem.screenshotDataUrl`). `FeedbackItem.status` (Nuevo/En progreso/Resuelto/No se va a hacer) IS the tracking log — no separate file. Fires a best-effort webhook via `src/lib/notify.ts` to `BARMGMT_NOTIFY_HOOK` (silent no-op until set) for a future n8n → Telegram/WhatsApp ping — full build spec in `FEEDBACK-NOTIFY-N8N-SOP.md` |
 | Ajustes | `/ajustes` | Venue name/currency, category list (read-only), password change |
 
 ## 5. Auth
@@ -100,6 +100,13 @@ Two separate scripts, deliberately not interchangeable:
 - **`scripts/verify-prod-readonly.ts`** — read-only, safe to run against the live production database anytime. Login, all 12 routes, one real PDF fetch, and a row-count check. Used to confirm the actual deploy after going live, without polluting Pablo's real data with test artifacts.
 - **`scripts/verify-seed.ts`** — sanity check for seed data (counts, quick-grid mapping, recipes).
 - **`scripts/set-admin-password.ts <new-password>`** — rotates the admin password directly against whatever `BARMGMT_DB_CONN` points at. Used to replace the seeded placeholder before real handoff.
+- **`scripts/verify-feedback-updates.ts`** — Feedback screenshot paste + update-notification system. Simulates a clipboard paste via a synthetic `ClipboardEvent` with a real PNG fixture (Playwright can't reach the OS clipboard headlessly).
+
+## 8b. Update notifications (bump this on every deploy)
+
+`src/lib/version.ts` exports `APP_VERSION` + a `CHANGELOG` map. `/api/version` always reflects whatever's currently deployed (no caching). `UpdateChecker` (wired into the dashboard layout) polls that endpoint every 30s + on tab focus — the moment it differs from the version the page loaded with, a "Actualización disponible" banner appears with a reload button. `WhatsNewModal` shows the current version's changelog once per browser (localStorage key `barmgmt_seen_version`).
+
+**Required step before every deploy that should notify users**: bump `APP_VERSION` in `src/lib/version.ts` and add a `CHANGELOG[APP_VERSION]` entry (title + bullet list). Skipping this means the deploy ships silently — no banner, no changelog — which is sometimes fine (invisible bugfixes) but should be a deliberate choice, not an oversight.
 
 ## 9. Known limitations (decisions, not bugs)
 
@@ -124,4 +131,4 @@ The live admin password was briefly hardcoded in 3 Playwright test scripts and h
 - Test scripts read credentials from `BARMGMT_TEST_PASSWORD` (or similar), always with a harmless fallback (`"cambiar123"`) for scripts safe to run against a fresh/empty DB — never a real value.
 - Before every commit, grep the staged diff for the current real password/secrets as a final check (`git diff --cached | grep -i <value>`) — caught the leak in `verify-inventario-crud.ts`/`verify-new-modules.ts`/`verify-prod-readonly.ts` this way before a *second* leak happened.
 - If a credential is ever found in history again: rotate first, ask Joan about a history scrub (destructive rewrite + force-push) second — never scrub without his explicit go-ahead, and never treat "removed from the working tree" as equivalent to "safe" once a public push has happened.
-<!-- updated: 2026-07-22 12:58 -->
+<!-- updated: 2026-07-22 13:09 -->
