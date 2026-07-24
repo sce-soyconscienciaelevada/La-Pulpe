@@ -23,6 +23,9 @@ export default async function InventarioPage() {
     reorderThreshold: p.reorderThreshold,
     categoryName: p.category.name,
     categoryId: p.categoryId,
+    servingsPerContainer: p.servingsPerContainer,
+    costPricePerContainer: p.costPricePerContainer,
+    salePricePerServing: p.salePricePerServing,
   }));
 
   return (

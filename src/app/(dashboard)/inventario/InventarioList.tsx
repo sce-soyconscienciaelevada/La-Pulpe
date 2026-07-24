@@ -14,6 +14,18 @@ type ProductRow = {
   reorderThreshold: number | null;
   categoryName: string;
   categoryId: string;
+  servingsPerContainer: number;
+  costPricePerContainer: number;
+  salePricePerServing: number | null;
+};
+
+type FormPrefill = {
+  name: string;
+  categoryId: string;
+  containerLabel: string;
+  servingsPerContainer: number;
+  costPricePerContainer: number;
+  salePricePerServing: number | null;
 };
 
 type Category = { id: string; name: string };
@@ -30,6 +42,8 @@ export function InventarioList({
   const [isPending, startTransition] = useTransition();
   const [showAddForm, setShowAddForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [formPrefill, setFormPrefill] = useState<FormPrefill | null>(null);
+  const [formKey, setFormKey] = useState(0);
 
   const grouped = useMemo(() => {
     const filtered = products.filter((p) =>
@@ -53,6 +67,27 @@ export function InventarioList({
     });
   }
 
+  function handleDuplicate(p: ProductRow) {
+    setFormPrefill({
+      name: p.name,
+      categoryId: p.categoryId,
+      containerLabel: p.containerLabel ?? "",
+      servingsPerContainer: p.servingsPerContainer,
+      costPricePerContainer: p.costPricePerContainer,
+      salePricePerServing: p.salePricePerServing,
+    });
+    setFormKey((k) => k + 1);
+    setShowAddForm(true);
+  }
+
+  function handleToggleAddForm() {
+    if (!showAddForm) {
+      setFormPrefill(null);
+      setFormKey((k) => k + 1);
+    }
+    setShowAddForm(!showAddForm);
+  }
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row gap-2 mb-4">
@@ -63,7 +98,7 @@ export function InventarioList({
           className="flex-1 rounded-lg border border-border bg-bg-card px-3 py-2.5 text-base text-text outline-none focus:border-accent"
         />
         <button
-          onClick={() => setShowAddForm(!showAddForm)}
+          onClick={handleToggleAddForm}
           className="rounded-lg bg-accent text-bg font-semibold px-4 py-2.5 text-sm whitespace-nowrap"
         >
           {showAddForm ? "Cancelar" : "+ Agregar producto"}
@@ -78,11 +113,14 @@ export function InventarioList({
 
       {showAddForm && (
         <AddProductForm
+          key={formKey}
           categories={categories}
+          initial={formPrefill}
           isPending={isPending}
           startTransition={startTransition}
           onDone={() => {
             setShowAddForm(false);
+            setFormPrefill(null);
             router.refresh();
           }}
         />
@@ -129,6 +167,15 @@ export function InventarioList({
                       </button>
                       <button
                         disabled={isPending}
+                        onClick={() => handleDuplicate(p)}
+                        className="w-7 h-7 rounded-full bg-border text-text-muted text-sm"
+                        aria-label={`Duplicar ${p.name}`}
+                        title="Duplicar producto (crear variante)"
+                      >
+                        📋
+                      </button>
+                      <button
+                        disabled={isPending}
                         onClick={() => handleDelete(p)}
                         className="w-7 h-7 rounded-full bg-border text-text-muted text-sm"
                         aria-label={`Eliminar ${p.name}`}
@@ -153,29 +200,38 @@ export function InventarioList({
 
 function AddProductForm({
   categories,
+  initial,
   isPending,
   startTransition,
   onDone,
 }: {
   categories: Category[];
+  initial: FormPrefill | null;
   isPending: boolean;
   startTransition: (fn: () => void | Promise<void>) => void;
   onDone: () => void;
 }) {
-  const [name, setName] = useState("");
-  const [categoryId, setCategoryId] = useState(categories[0]?.id ?? "");
-  const [containerLabel, setContainerLabel] = useState("");
-  const [servingsPerContainer, setServingsPerContainer] = useState(1);
-  const [costPricePerContainer, setCostPricePerContainer] = useState(0);
+  const [name, setName] = useState(initial?.name ?? "");
+  const [categoryId, setCategoryId] = useState(initial?.categoryId ?? categories[0]?.id ?? "");
+  const [containerLabel, setContainerLabel] = useState(initial?.containerLabel ?? "");
+  const [servingsPerContainer, setServingsPerContainer] = useState(initial?.servingsPerContainer ?? 1);
+  const [costPricePerContainer, setCostPricePerContainer] = useState(initial?.costPricePerContainer ?? 0);
+  const [salePricePerServing, setSalePricePerServing] = useState(
+    initial?.salePricePerServing != null ? String(initial.salePricePerServing) : ""
+  );
 
   return (
     <Card className="mb-4">
-      <h3 className="font-semibold text-text mb-3">Nuevo producto</h3>
+      <h3 className="font-semibold text-text mb-3">
+        {initial ? `Duplicar "${initial.name}"` : "Nuevo producto"}
+      </h3>
       <div className="grid sm:grid-cols-2 gap-3 mb-3">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Nombre"
+          autoFocus={!!initial}
+          onFocus={(e) => initial && e.target.select()}
           className="rounded-lg border border-border bg-bg-elevated px-3 py-2.5 text-sm text-text sm:col-span-2"
         />
         <select
@@ -211,6 +267,14 @@ function AddProductForm({
           placeholder="Costo por envase ($)"
           className="rounded-lg border border-border bg-bg-elevated px-3 py-2.5 text-sm text-text"
         />
+        <input
+          type="number"
+          step="0.01"
+          value={salePricePerServing}
+          onChange={(e) => setSalePricePerServing(e.target.value)}
+          placeholder="Precio de venta por medida ($)"
+          className="rounded-lg border border-border bg-bg-elevated px-3 py-2.5 text-sm text-text sm:col-span-2"
+        />
       </div>
       <button
         disabled={isPending || !name.trim() || !categoryId}
@@ -222,6 +286,7 @@ function AddProductForm({
               containerLabel,
               servingsPerContainer,
               costPricePerContainer,
+              salePricePerServing: salePricePerServing.trim() === "" ? null : Number(salePricePerServing),
             });
             onDone();
           })
@@ -231,7 +296,7 @@ function AddProductForm({
         Crear producto
       </button>
       <p className="text-xs text-text-muted mt-2">
-        Para más detalle (emoji, precio de venta, proveedor) editalo después en Productos.
+        Para más detalle (emoji, proveedor, grilla rápida) editalo después en Productos.
       </p>
     </Card>
   );

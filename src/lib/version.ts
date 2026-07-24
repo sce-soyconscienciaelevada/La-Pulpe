@@ -1,9 +1,17 @@
 // Bump this string on every deploy that should trigger the "actualización
 // disponible" banner + "what's new" popup. Add a matching CHANGELOG entry --
 // that's what the popup shows. See TECHNICAL-GUIDE.md's deploy checklist.
-export const APP_VERSION = "2026-07-22.2";
+export const APP_VERSION = "2026-07-24.1";
 
 export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
+  "2026-07-24.1": {
+    title: "Carta real cargada + costos y duplicar producto",
+    items: [
+      "Precios de venta reales de la carta ya están cargados en el sistema",
+      "Precios & Rentabilidad: ahora podés cargar el costo por envase directo en la tabla",
+      "Inventario: botón 📋 para duplicar un producto y crear variantes rápido (ej: Jarra Naranja, Jarra Frutilla)",
+    ],
+  },
   "2026-07-22.2": {
     title: "Capturas en Feedback + avisos de actualización",
     items: [

@@ -14,3 +14,14 @@ export async function updateSalePrice(productId: string, salePricePerServing: nu
   revalidatePath("/registro");
   revalidatePath("/");
 }
+
+export async function updateCostPrice(productId: string, costPricePerContainer: number) {
+  await requireAdmin();
+  await prisma.product.update({ where: { id: productId }, data: { costPricePerContainer } });
+  await prisma.productPriceHistory.create({
+    data: { productId, price: costPricePerContainer, priceType: "COST" },
+  });
+  revalidatePath("/precios");
+  revalidatePath("/costeo");
+  revalidatePath("/");
+}

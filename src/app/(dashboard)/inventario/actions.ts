@@ -41,6 +41,7 @@ export async function createProductQuick(input: {
   containerLabel: string;
   servingsPerContainer: number;
   costPricePerContainer: number;
+  salePricePerServing?: number | null;
 }) {
   await requireAdmin();
   if (!input.name.trim() || !input.categoryId) return;
@@ -53,6 +54,7 @@ export async function createProductQuick(input: {
       containerLabel: input.containerLabel.trim() || null,
       servingsPerContainer: input.servingsPerContainer || 1,
       costPricePerContainer: input.costPricePerContainer || 0,
+      salePricePerServing: input.salePricePerServing ?? null,
       isSellable: true,
       isRecipeIngredient: true,
       currentStock: 0,

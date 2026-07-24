@@ -20,6 +20,7 @@ export default async function PreciosPage() {
       id: p.id,
       name: p.name,
       emoji: p.emoji,
+      costPricePerContainer: p.costPricePerContainer,
       costPerServing: pricing.costPerServing,
       salePricePerServing: p.salePricePerServing,
       profitPerServing: pricing.profitPerServing,
