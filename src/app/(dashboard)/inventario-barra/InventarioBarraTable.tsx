@@ -47,21 +47,23 @@ export function InventarioBarraTable({ groups }: { groups: Group[] }) {
     return `${rowId}:${field}`;
   }
 
-  function valueFor(row: Row, field: "entradas" | "ventaPunto" | "countedPhysical") {
+  type Field = "initialQuantity" | "entradas" | "ventaPunto" | "countedPhysical";
+
+  function valueFor(row: Row, field: Field) {
     const draft = drafts[fieldKey(row.id, field)];
     if (draft !== undefined) return draft;
     const v = row[field];
     return v === null || v === undefined ? "" : String(v);
   }
 
-  function save(row: Row, field: "entradas" | "ventaPunto" | "countedPhysical", raw: string) {
+  function save(row: Row, field: Field, raw: string) {
     const v = raw === "" ? null : Number(raw);
     if (v !== null && Number.isNaN(v)) return;
     startTransition(async () => {
       if (field === "countedPhysical") {
         await updateBarInventoryEntry(row.id, { countedPhysical: v });
       } else {
-        await updateBarInventoryEntry(row.id, { [field]: v ?? 0 } as { entradas: number } | { ventaPunto: number });
+        await updateBarInventoryEntry(row.id, { [field]: v ?? 0 });
       }
       router.refresh();
     });
@@ -94,8 +96,18 @@ export function InventarioBarraTable({ groups }: { groups: Group[] }) {
                 return (
                   <tr key={row.id} className="border-b border-border">
                     <td className="px-3 py-2 text-text whitespace-nowrap">{row.productName}</td>
-                    <td className="px-2 py-2 text-text-muted text-center whitespace-nowrap">
-                      {formatClosedOpen(row.initialQuantity)}
+                    <td className="px-1 py-1">
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={valueFor(row, "initialQuantity")}
+                        onChange={(e) => setDrafts({ ...drafts, [fieldKey(row.id, "initialQuantity")]: e.target.value })}
+                        onBlur={(e) => save(row, "initialQuantity", e.target.value)}
+                        className="w-16 rounded-lg border border-border bg-bg-elevated px-2 py-1 text-sm text-text text-center outline-none focus:border-accent"
+                      />
+                      <div className="text-[10px] text-text-muted text-center mt-0.5 whitespace-nowrap">
+                        {formatClosedOpen(row.initialQuantity)}
+                      </div>
                     </td>
                     <td className="px-1 py-1">
                       <input

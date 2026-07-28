@@ -63,9 +63,13 @@ export async function ensureTodayEntries(venueId: string, businessDayId: string)
       where: { productId: product.id, businessDayId: { not: businessDayId } },
       orderBy: { createdAt: "desc" },
     });
+    // First time this product ever appears here: seed from the stock number
+    // Inventario already tracks (currentStock, in containers/piezas — same
+    // unit this module uses) instead of defaulting to 0. Every day after
+    // that, yesterday's Final Teórico rolls forward per the SOP's own rule.
     const initialQuantity = previous
       ? computeFinalTeorico(previous.initialQuantity, previous.entradas, previous.ventaPunto)
-      : 0;
+      : product.currentStock;
 
     await prisma.barInventoryEntry.create({
       data: { venueId, businessDayId, productId: product.id, initialQuantity },
