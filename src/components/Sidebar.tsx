@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { SignOutButton } from "./SignOutButton";
+import { NotificationsBell } from "./NotificationsBell";
 
 const NAV = [
   { href: "/", label: "Inicio", icon: "🏠" },
@@ -26,7 +27,17 @@ const NAV = [
   { href: "/ajustes", label: "Ajustes", icon: "⚙️" },
 ];
 
-export function Sidebar({ venueName, userEmail }: { venueName: string; userEmail: string }) {
+export function Sidebar({
+  venueName,
+  userEmail,
+  version,
+  changelog,
+}: {
+  venueName: string;
+  userEmail: string;
+  version: string;
+  changelog: Record<string, { title: string; items: string[] }>;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -35,13 +46,16 @@ export function Sidebar({ venueName, userEmail }: { venueName: string; userEmail
       {/* Mobile top bar */}
       <div className="md:hidden sticky top-0 z-30 flex items-center justify-between bg-bg-elevated border-b border-border px-4 py-3">
         <span className="font-semibold text-text">{venueName}</span>
-        <button
-          onClick={() => setOpen(!open)}
-          aria-label="Abrir menú"
-          className="text-text text-2xl leading-none px-2"
-        >
-          {open ? "✕" : "☰"}
-        </button>
+        <div className="flex items-center gap-1">
+          <NotificationsBell version={version} changelog={changelog} />
+          <button
+            onClick={() => setOpen(!open)}
+            aria-label="Abrir menú"
+            className="text-text text-2xl leading-none px-2"
+          >
+            {open ? "✕" : "☰"}
+          </button>
+        </div>
       </div>
 
       {open && (
@@ -58,9 +72,12 @@ export function Sidebar({ venueName, userEmail }: { venueName: string; userEmail
           ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
         `}
       >
-        <div className="hidden md:block px-5 py-5 border-b border-border">
-          <div className="font-semibold text-text text-lg">{venueName}</div>
-          <div className="text-xs text-text-muted">{userEmail}</div>
+        <div className="hidden md:flex items-start justify-between px-5 py-5 border-b border-border">
+          <div>
+            <div className="font-semibold text-text text-lg">{venueName}</div>
+            <div className="text-xs text-text-muted">{userEmail}</div>
+          </div>
+          <NotificationsBell version={version} changelog={changelog} />
         </div>
 
         <nav className="flex-1 overflow-y-auto py-2">
