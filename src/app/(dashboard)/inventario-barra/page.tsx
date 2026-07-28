@@ -56,7 +56,12 @@ export default async function InventarioBarraPage() {
           <strong>Puntos de conteo</strong> en Productos para que aparezcan acá.
         </p>
       ) : (
-        <InventarioBarraTable groups={Array.from(groups.entries()).map(([name, items]) => ({ name, items }))} />
+        <>
+          <p className="text-xs text-text-muted mb-3">
+            Ej: "2 cerradas + abierta (7/10)" = 2 botellas selladas más una en uso, marcada en 7 de sus 10 puntos.
+          </p>
+          <InventarioBarraTable groups={Array.from(groups.entries()).map(([name, items]) => ({ name, items }))} />
+        </>
       )}
     </div>
   );

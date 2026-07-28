@@ -23,6 +23,21 @@ function finalTeorico(row: { initialQuantity: number; entradas: number; ventaPun
   return row.initialQuantity + row.entradas - row.ventaPunto;
 }
 
+// Splits a blended quantity (whole sealed piezas + the currently-open
+// bottle's remaining fraction) for display — matches the source SOP's own
+// convention: "Botella cerrada = 1 pieza = 1.0". A value like 2.7 means
+// 2 sealed piezas plus one open bottle marked at 0.7 (7 of its 10 counted
+// puntos remain). Kept local to this Client Component (not imported from
+// lib/bar-inventory.ts) to avoid pulling Prisma into the browser bundle —
+// same reason HeladerasTable/VentasPosClient split their helpers out.
+function formatClosedOpen(totalQuantity: number): string {
+  const closedPiezas = Math.floor(totalQuantity + 1e-9);
+  const openFraction = Math.max(0, totalQuantity - closedPiezas);
+  if (openFraction < 0.05) return `${closedPiezas} cerrada${closedPiezas === 1 ? "" : "s"}`;
+  const puntos = Math.round(openFraction * 10);
+  return `${closedPiezas} cerrada${closedPiezas === 1 ? "" : "s"} + abierta (${puntos}/10)`;
+}
+
 export function InventarioBarraTable({ groups }: { groups: Group[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -79,7 +94,9 @@ export function InventarioBarraTable({ groups }: { groups: Group[] }) {
                 return (
                   <tr key={row.id} className="border-b border-border">
                     <td className="px-3 py-2 text-text whitespace-nowrap">{row.productName}</td>
-                    <td className="px-2 py-2 text-text-muted text-center">{row.initialQuantity.toFixed(1)}</td>
+                    <td className="px-2 py-2 text-text-muted text-center whitespace-nowrap">
+                      {formatClosedOpen(row.initialQuantity)}
+                    </td>
                     <td className="px-1 py-1">
                       <input
                         type="number"
@@ -100,7 +117,9 @@ export function InventarioBarraTable({ groups }: { groups: Group[] }) {
                         className="w-16 rounded-lg border border-border bg-bg-elevated px-2 py-1 text-sm text-text text-center outline-none focus:border-accent"
                       />
                     </td>
-                    <td className="px-2 py-2 text-center font-medium text-text">{teorico.toFixed(1)}</td>
+                    <td className="px-2 py-2 text-center font-medium text-text whitespace-nowrap">
+                      {formatClosedOpen(teorico)}
+                    </td>
                     <td className="px-2 py-2 text-center text-text-muted">
                       {row.registroReference !== null ? row.registroReference.toFixed(1) : "—"}
                     </td>
@@ -113,6 +132,11 @@ export function InventarioBarraTable({ groups }: { groups: Group[] }) {
                         onBlur={(e) => save(row, "countedPhysical", e.target.value)}
                         className="w-16 rounded-lg border border-border bg-bg-elevated px-2 py-1 text-sm text-text text-center outline-none focus:border-accent"
                       />
+                      {counted !== null && !Number.isNaN(counted) && (
+                        <div className="text-[10px] text-text-muted text-center mt-0.5 whitespace-nowrap">
+                          {formatClosedOpen(counted)}
+                        </div>
+                      )}
                     </td>
                     <td className="px-2 py-2 text-center">
                       {variance === null ? (

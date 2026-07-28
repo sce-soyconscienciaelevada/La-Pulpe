@@ -18,6 +18,33 @@ export function computeVariance(countedPhysical: number | null, finalTeorico: nu
   return countedPhysical - finalTeorico;
 }
 
+// Splits a blended quantity (whole bottles + the currently-open bottle's
+// remaining fraction) into its two parts for display — matches the source
+// SOP's own convention exactly: "Botella cerrada = 1 pieza = 1.0"; a value
+// like 2.7 means 2 sealed piezas plus one open bottle marked at 0.7 (7 of
+// its 10 counted puntos remain). No schema change needed — this is purely
+// a read-time decomposition of the same number already stored.
+export function splitClosedOpen(totalQuantity: number): { closedPiezas: number; openFraction: number } {
+  const closedPiezas = Math.floor(totalQuantity + 1e-9); // tiny epsilon guards float rounding (2.9999999 -> 3)
+  const openFraction = Math.max(0, totalQuantity - closedPiezas);
+  return { closedPiezas, openFraction };
+}
+
+export function formatClosedOpen(totalQuantity: number): string {
+  const { closedPiezas, openFraction } = splitClosedOpen(totalQuantity);
+  if (openFraction < 0.05) return `${closedPiezas} cerrada${closedPiezas === 1 ? "" : "s"}`;
+  const puntos = Math.round(openFraction * 10);
+  return `${closedPiezas} cerrada${closedPiezas === 1 ? "" : "s"} + abierta (${puntos}/10)`;
+}
+
+// Compact form for narrow PDF table columns, e.g. "2 + 7/10" or just "2".
+export function formatClosedOpenCompact(totalQuantity: number): string {
+  const { closedPiezas, openFraction } = splitClosedOpen(totalQuantity);
+  if (openFraction < 0.05) return `${closedPiezas}`;
+  const puntos = Math.round(openFraction * 10);
+  return `${closedPiezas}+${puntos}/10`;
+}
+
 // Auto-provisions today's BarInventoryEntry for every point-tracked product,
 // rolling yesterday's Final Teórico into today's Existencia Inicial — same
 // rule as the paper SOP's own "Paso 6" (cierre del ciclo).

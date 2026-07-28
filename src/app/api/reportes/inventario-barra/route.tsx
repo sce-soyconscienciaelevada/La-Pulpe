@@ -4,7 +4,7 @@ import { Document, Page, Text, View, pdf, StyleSheet } from "@react-pdf/renderer
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/require-admin";
 import { getWeekDates, dateKey, formatWeekLabel, DAY_LABELS } from "@/lib/fridge-shared";
-import { computeFinalTeorico } from "@/lib/bar-inventory";
+import { computeFinalTeorico, formatClosedOpenCompact } from "@/lib/bar-inventory";
 
 const styles = StyleSheet.create({
   page: { padding: 24, fontSize: 7, fontFamily: "Helvetica", color: "#1c202a" },
@@ -60,6 +60,7 @@ export async function GET(request: Request) {
         <Text style={styles.title}>{venue.name.toUpperCase()}</Text>
         <Text style={styles.subtitle}>Inventario de Barra — Sistema de Puntos</Text>
         <Text style={styles.weekLabel}>Semana {formatWeekLabel(weekDates)}</Text>
+        <Text style={styles.weekLabel}>N = piezas cerradas. N+X/10 = N cerradas más una abierta marcada en X de sus 10 puntos.</Text>
 
         {Array.from(groups.entries()).map(([categoryName, items]) => (
           <View key={categoryName} style={styles.section} wrap={false}>
@@ -79,7 +80,7 @@ export async function GET(request: Request) {
                   const teorico = e ? computeFinalTeorico(e.initialQuantity, e.entradas, e.ventaPunto) : null;
                   return (
                     <Text key={dateKey(day)} style={styles.cellDay}>
-                      {teorico !== null ? teorico.toFixed(1) : "—"}
+                      {teorico !== null ? formatClosedOpenCompact(teorico) : "—"}
                     </Text>
                   );
                 })}
@@ -87,7 +88,7 @@ export async function GET(request: Request) {
                   {(() => {
                     const last = entryFor(product.id, weekDates[6]);
                     return last?.countedPhysical !== null && last?.countedPhysical !== undefined
-                      ? last.countedPhysical.toFixed(1)
+                      ? formatClosedOpenCompact(last.countedPhysical)
                       : "—";
                   })()}
                 </Text>
