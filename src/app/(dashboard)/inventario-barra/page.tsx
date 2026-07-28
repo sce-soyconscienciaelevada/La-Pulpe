@@ -59,7 +59,7 @@ export default async function InventarioBarraPage() {
         <>
           <p className="text-xs text-text-muted mb-3">
             Ej: "2 cerradas + abierta (7/10)" = 2 botellas selladas más una en uso, marcada en 7 de sus 10 puntos.
-            "Exist. inicial" se corrige a mano si el conteo real no coincide — se toma del stock de Inventario la
+            "Exist." se corrige a mano si el conteo real no coincide — se toma del stock de Inventario la
             primera vez que aparece un producto acá, después se calcula solo día a día.
           </p>
           <InventarioBarraTable groups={Array.from(groups.entries()).map(([name, items]) => ({ name, items }))} />

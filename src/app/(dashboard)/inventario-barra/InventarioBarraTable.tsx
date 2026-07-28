@@ -78,10 +78,10 @@ export function InventarioBarraTable({ groups }: { groups: Group[] }) {
             <thead>
               <tr className="text-left text-xs text-text-muted border-b border-border">
                 <th className="px-3 py-2">Producto</th>
-                <th className="px-2 py-2">Exist. inicial</th>
-                <th className="px-2 py-2">Entradas</th>
+                <th className="px-2 py-2">Exist.</th>
+                <th className="px-2 py-2">Ent.</th>
                 <th className="px-2 py-2">Venta x Punto</th>
-                <th className="px-2 py-2">Final Teórico</th>
+                <th className="px-2 py-2">Vent. Final Teórico</th>
                 <th className="px-2 py-2">Referencia Registro</th>
                 <th className="px-2 py-2">Contado físico</th>
                 <th className="px-2 py-2">Diferencia</th>
