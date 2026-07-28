@@ -14,6 +14,7 @@ export type ProductFormValues = {
   showOnQuickGrid: boolean;
   primarySupplierId: string | null;
   reorderThreshold: number | null;
+  countingServingsPerContainer: number | null;
 };
 
 export function ProductForm({
@@ -127,6 +128,18 @@ export function ProductForm({
           <option value="CON_GAS">Con gas</option>
           <option value="SIN_GAS">Sin gas</option>
         </select>
+      </label>
+
+      <label className="text-sm text-text-muted">
+        Puntos de conteo (Inventario de Barra)
+        <input
+          name="countingServingsPerContainer"
+          type="number"
+          step="1"
+          defaultValue={initial?.countingServingsPerContainer ?? ""}
+          placeholder="sin configurar"
+          className="mt-1 w-full rounded-lg border border-border bg-bg-elevated px-3 py-2.5 text-base text-text"
+        />
       </label>
 
       <label className="text-sm text-text-muted">

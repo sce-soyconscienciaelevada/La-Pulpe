@@ -6,13 +6,14 @@ export async function notifyFeedback(payload: {
   title: string;
   description: string;
   venueName: string;
+  screenshotDataUrl?: string;
 }) {
   const url = process.env["BARMGMT_NOTIFY_HOOK"];
   if (!url) return; // not configured yet — silent no-op, see feedback module docs
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    const timeout = setTimeout(() => controller.abort(), 8000); // screenshot payload can be larger than text-only
     await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

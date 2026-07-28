@@ -23,21 +23,24 @@ model Venue {
   currency  String   @default("ARS")
   createdAt DateTime @default(now())
 
-  users         User[]
-  people        Person[]
-  categories    Category[]
-  products      Product[]
-  suppliers     Supplier[]
-  businessDays  BusinessDay[]
-  consumptions  Consumption[]
-  reorderItems  ReorderItem[]
-  purchases     Purchase[]
-  adjustments   StockAdjustment[]
-  stockPeriods  StockPeriod[]
-  auditLogs     AuditLog[]
+  users                 User[]
+  people                Person[]
+  categories            Category[]
+  products              Product[]
+  suppliers             Supplier[]
+  businessDays          BusinessDay[]
+  consumptions          Consumption[]
+  reorderItems          ReorderItem[]
+  purchases             Purchase[]
+  adjustments           StockAdjustment[]
+  stockPeriods          StockPeriod[]
+  auditLogs             AuditLog[]
   glasswareItems        GlasswareItem[]
   glasswareMonthPeriods GlasswareMonthPeriod[]
   feedbackItems         FeedbackItem[]
+  barInventoryEntries   BarInventoryEntry[]
+  fridgeUnits           FridgeUnit[]
+  posSalesPeriods       PosSalesPeriod[]
 }
 
 enum UserRole {
@@ -76,7 +79,8 @@ model Person {
   isActive    Boolean    @default(true)
   createdAt   DateTime   @default(now())
 
-  consumptions Consumption[]
+  consumptions    Consumption[]
+  fridgeIncidents FridgeIncident[]
 
   @@index([venueId])
 }
@@ -105,7 +109,7 @@ model Category {
   sortOrder Int          @default(0)
 
   products  Product[]
-  suppliers Supplier[]   @relation("SupplierCategories")
+  suppliers Supplier[] @relation("SupplierCategories")
 
   @@index([venueId])
 }
@@ -161,13 +165,27 @@ model Product {
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
 
-  priceHistory      ProductPriceHistory[]
-  consumptions      Consumption[]
-  purchases         Purchase[]
-  adjustments       StockAdjustment[]
-  stockCounts       StockCount[]
-  recipe            Recipe?
-  usedInRecipes     RecipeIngredient[]
+  // Puntos de conteo (Inventario de Barra) -- deliberately separate from
+  // servingsPerContainer above, which drives cost/margin math with the true
+  // medida count. This is the margin-buffered count (e.g. 10, not 12) used
+  // only for daily open-bottle shrinkage detection. Null = "sin configurar"
+  // until Pablo/Joan confirm real per-product values -- never guess-fill it.
+  countingServingsPerContainer Int?
+
+  // POS ticket código (Ventas POS) -- links this Product to the bar's POS
+  // system's own numeric code, e.g. "104". Non-unique on purpose: a code
+  // could plausibly cover more than one physical product via a combo line.
+  posCode String?
+
+  priceHistory        ProductPriceHistory[]
+  consumptions        Consumption[]
+  purchases           Purchase[]
+  adjustments         StockAdjustment[]
+  stockCounts         StockCount[]
+  recipe              Recipe?
+  usedInRecipes       RecipeIngredient[]
+  barInventoryEntries BarInventoryEntry[]
+  posSalesLines       PosSalesLine[]
 
   @@index([venueId])
   @@index([categoryId])
@@ -190,18 +208,18 @@ model ProductPriceHistory {
 }
 
 model Supplier {
-  id           String     @id @default(cuid())
+  id           String   @id @default(cuid())
   venueId      String
-  venue        Venue      @relation(fields: [venueId], references: [id])
+  venue        Venue    @relation(fields: [venueId], references: [id])
   name         String
   contactPhone String?
   contactNote  String?
-  createdAt    DateTime   @default(now())
+  createdAt    DateTime @default(now())
 
-  categories       Category[]    @relation("SupplierCategories")
-  primaryProducts  Product[]
-  reorderItems     ReorderItem[]
-  purchases        Purchase[]
+  categories      Category[]    @relation("SupplierCategories")
+  primaryProducts Product[]
+  reorderItems    ReorderItem[]
+  purchases       Purchase[]
 
   @@index([venueId])
 }
@@ -222,8 +240,9 @@ model BusinessDay {
   openedAt DateTime          @default(now())
   closedAt DateTime?
 
-  consumptions Consumption[]
-  reorderItems ReorderItem[]
+  consumptions        Consumption[]
+  reorderItems        ReorderItem[]
+  barInventoryEntries BarInventoryEntry[]
 
   @@unique([venueId, date])
 }
@@ -310,15 +329,15 @@ enum StockAdjustmentReason {
 }
 
 model StockAdjustment {
-  id            String                 @id @default(cuid())
+  id            String                @id @default(cuid())
   venueId       String
-  venue         Venue                  @relation(fields: [venueId], references: [id])
+  venue         Venue                 @relation(fields: [venueId], references: [id])
   productId     String
-  product       Product                @relation(fields: [productId], references: [id])
+  product       Product               @relation(fields: [productId], references: [id])
   quantityDelta Float
   reason        StockAdjustmentReason
   note          String?
-  createdAt     DateTime               @default(now())
+  createdAt     DateTime              @default(now())
 
   @@index([venueId])
   @@index([productId])
@@ -346,15 +365,15 @@ model StockPeriod {
 }
 
 model StockCount {
-  id                     String      @id @default(cuid())
-  stockPeriodId          String
-  stockPeriod            StockPeriod @relation(fields: [stockPeriodId], references: [id])
-  productId              String
-  product                Product     @relation(fields: [productId], references: [id])
-  initialQuantity        Float       @default(0)
-  expectedFinalQuantity  Float?
-  countedFinalQuantity   Float?
-  variance               Float?
+  id                    String      @id @default(cuid())
+  stockPeriodId         String
+  stockPeriod           StockPeriod @relation(fields: [stockPeriodId], references: [id])
+  productId             String
+  product               Product     @relation(fields: [productId], references: [id])
+  initialQuantity       Float       @default(0)
+  expectedFinalQuantity Float?
+  countedFinalQuantity  Float?
+  variance              Float?
 
   @@unique([stockPeriodId, productId])
 }
@@ -362,19 +381,19 @@ model StockCount {
 // ─────────────────────────── Recipes ───────────────────────────
 
 model Recipe {
-  id             String   @id @default(cuid())
-  productId      String   @unique
-  product        Product  @relation(fields: [productId], references: [id])
-  yieldServings  Float    @default(1)
+  id            String  @id @default(cuid())
+  productId     String  @unique
+  product       Product @relation(fields: [productId], references: [id])
+  yieldServings Float   @default(1)
 
   // Ficha técnica (Recetario) — presentational detail on top of the cost
   // recipe above. Photo is a pasted URL for v1 (device upload needs Vercel
   // Blob, not wired yet — see TECHNICAL-GUIDE.md).
-  photoUrl           String?
-  description        String?
-  preparationSteps   String?
-  garnish            String?
-  glassLabel         String?
+  photoUrl         String?
+  description      String?
+  preparationSteps String?
+  garnish          String?
+  glassLabel       String?
 
   ingredients RecipeIngredient[]
 }
@@ -421,16 +440,16 @@ enum GlasswareLocation {
 }
 
 model GlasswareItem {
-  id         String            @id @default(cuid())
-  venueId    String
-  venue      Venue             @relation(fields: [venueId], references: [id])
-  code       String
-  name       String
-  location   GlasswareLocation
-  stockBase  Float             @default(0)
-  sortOrder  Int               @default(0)
-  isActive   Boolean           @default(true)
-  createdAt  DateTime          @default(now())
+  id        String            @id @default(cuid())
+  venueId   String
+  venue     Venue             @relation(fields: [venueId], references: [id])
+  code      String
+  name      String
+  location  GlasswareLocation
+  stockBase Float             @default(0)
+  sortOrder Int               @default(0)
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now())
 
   counts GlasswareCount[]
 
@@ -470,11 +489,11 @@ model GlasswareWeekEntry {
 }
 
 model GlasswareCount {
-  id             String              @id @default(cuid())
-  weekEntryId    String
-  weekEntry      GlasswareWeekEntry  @relation(fields: [weekEntryId], references: [id], onDelete: Cascade)
-  itemId         String
-  item           GlasswareItem       @relation(fields: [itemId], references: [id])
+  id              String             @id @default(cuid())
+  weekEntryId     String
+  weekEntry       GlasswareWeekEntry @relation(fields: [weekEntryId], references: [id], onDelete: Cascade)
+  itemId          String
+  item            GlasswareItem      @relation(fields: [itemId], references: [id])
   countedQuantity Float
 
   @@unique([weekEntryId, itemId])
@@ -516,4 +535,143 @@ model FeedbackItem {
   resolvedAt        DateTime?
 
   @@index([venueId])
+}
+
+// ─────────────────────────── Inventario de Barra (puntos) ───────────────────────────
+// Daily open-bottle shrinkage-detection layer, separate from Stock semanal
+// (StockPeriod/StockCount, the weekly all-categories physical count). Only
+// covers the 8 point-tracked liquor categories (Ron, Vodka, Whisky, Tequila,
+// Mezcal, Ginebra, Coñac/Brandy, Licor). Reuses the existing BusinessDay as
+// the daily anchor -- Registro already opens/closes one per date.
+// ventaPunto is a MANUAL tally (staff mark points as they pour, enter the
+// day's total at shift close) -- deliberately NOT derived from Consumption,
+// since the entire point of this SOP is catching a pour that never got rung
+// up digitally. finalTeorico/variance are computed at read time, never
+// stored, matching this app's established convention (see lib/pricing.ts).
+
+model BarInventoryEntry {
+  id              String      @id @default(cuid())
+  venueId         String
+  venue           Venue       @relation(fields: [venueId], references: [id])
+  businessDayId   String
+  businessDay     BusinessDay @relation(fields: [businessDayId], references: [id])
+  productId       String
+  product         Product     @relation(fields: [productId], references: [id])
+  initialQuantity Float       @default(0) // points (tenths of a container)
+  entradas        Float       @default(0) // points
+  ventaPunto      Float       @default(0) // points, manual tally
+  countedPhysical Float? // points, entered at shift close
+  createdAt       DateTime    @default(now())
+
+  @@unique([businessDayId, productId])
+  @@index([venueId])
+  @@index([productId])
+}
+
+// ─────────────────────────── Control Temperatura Heladeras ───────────────────────────
+// Weekly fridge/cooler temperature log, matching Pablo's paper sheet.
+// Status (verde/amarillo/rojo/sin lectura) is computed at read time from
+// tempC, never stored -- same convention as Precios/BarInventoryEntry.
+
+model FridgeUnit {
+  id        String   @id @default(cuid())
+  venueId   String
+  venue     Venue    @relation(fields: [venueId], references: [id])
+  code      String // "H1".."H6"
+  name      String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  tempEntries FridgeTempEntry[]
+  incidents   FridgeIncident[]
+
+  @@index([venueId])
+}
+
+model FridgeTempEntry {
+  id     String     @id @default(cuid())
+  unitId String
+  unit   FridgeUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  date   DateTime
+  tempC  Float? // null = "sin lectura"
+
+  @@unique([unitId, date])
+  @@index([unitId])
+}
+
+model FridgeIncident {
+  id                  String     @id @default(cuid())
+  unitId              String
+  unit                FridgeUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  date                DateTime
+  tempRecorded        Float?
+  actionTaken         String
+  responsiblePersonId String?
+  responsiblePerson   Person?    @relation(fields: [responsiblePersonId], references: [id])
+  createdAt           DateTime   @default(now())
+
+  @@index([unitId])
+}
+
+// ─────────────────────────── Ventas POS ───────────────────────────
+// Weekly/irregular-period sales totals transcribed by hand from the POS
+// system's own printed "TOTALES" ticket. Categories are the POS system's
+// OWN taxonomy (Cervezas, Chopp, Jarras, ...) -- intentionally separate from
+// Category.kind, which serves internal stock/cost categorization instead.
+// % share, cross-check badges and reconciliation variance are computed at
+// read time, never stored -- same convention as every other module.
+
+enum PosSalesPeriodStatus {
+  OPEN
+  CLOSED
+}
+
+model PosSalesPeriod {
+  id            String               @id @default(cuid())
+  venueId       String
+  venue         Venue                @relation(fields: [venueId], references: [id])
+  label         String // "18/07/26 19:55 hs a 25/07/26 (8 días)" -- irregular, as transcribed
+  startAt       DateTime
+  endAt         DateTime
+  status        PosSalesPeriodStatus @default(OPEN)
+  totalUnidades Float? // grand total as printed -- cross-check vs sum(lines)
+  notes         String?
+  createdAt     DateTime             @default(now())
+  closedAt      DateTime?
+
+  categories PosSalesCategory[]
+
+  @@index([venueId])
+  @@index([startAt])
+}
+
+model PosSalesCategory {
+  id          String         @id @default(cuid())
+  periodId    String
+  period      PosSalesPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  name        String // POS's own taxonomy, free text
+  totalTicket Float? // category subtotal as printed -- cross-check vs sum(lines)
+  sortOrder   Int            @default(0)
+
+  lines PosSalesLine[]
+
+  @@unique([periodId, name])
+  @@index([periodId])
+}
+
+model PosSalesLine {
+  id               String           @id @default(cuid())
+  categoryId       String
+  category         PosSalesCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  posCode          String
+  descripcion      String
+  unidadesVendidas Float
+  productId        String? // null = "no match, descripción only"
+  product          Product?         @relation(fields: [productId], references: [id])
+  createdAt        DateTime         @default(now())
+
+  @@index([categoryId])
+  @@index([posCode])
+  @@index([productId])
 }

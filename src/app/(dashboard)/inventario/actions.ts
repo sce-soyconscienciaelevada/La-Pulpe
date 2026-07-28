@@ -69,12 +69,15 @@ export async function createProductQuick(input: {
 export async function deleteProductFromInventario(productId: string) {
   await requireAdmin();
 
-  const [consumptionCount, purchaseCount, recipeUseCount, hasOwnRecipe] = await Promise.all([
-    prisma.consumption.count({ where: { productId } }),
-    prisma.purchase.count({ where: { productId } }),
-    prisma.recipeIngredient.count({ where: { ingredientProductId: productId } }),
-    prisma.recipe.findUnique({ where: { productId } }),
-  ]);
+  const [consumptionCount, purchaseCount, recipeUseCount, hasOwnRecipe, posSalesLineCount, barInventoryCount] =
+    await Promise.all([
+      prisma.consumption.count({ where: { productId } }),
+      prisma.purchase.count({ where: { productId } }),
+      prisma.recipeIngredient.count({ where: { ingredientProductId: productId } }),
+      prisma.recipe.findUnique({ where: { productId } }),
+      prisma.posSalesLine.count({ where: { productId } }),
+      prisma.barInventoryEntry.count({ where: { productId } }),
+    ]);
 
   if (consumptionCount > 0 || purchaseCount > 0) {
     return {
@@ -84,6 +87,12 @@ export async function deleteProductFromInventario(productId: string) {
   }
   if (recipeUseCount > 0) {
     return { error: "No se puede eliminar: se usa como ingrediente en una o más recetas." };
+  }
+  if (posSalesLineCount > 0) {
+    return { error: "No se puede eliminar: está vinculado a líneas de Ventas POS." };
+  }
+  if (barInventoryCount > 0) {
+    return { error: "No se puede eliminar: tiene registros en Inventario de Barra." };
   }
 
   await prisma.$transaction(async (tx) => {

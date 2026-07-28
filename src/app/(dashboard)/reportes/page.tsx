@@ -6,6 +6,8 @@ const REPORTS = [
   { href: "/api/reportes/rentabilidad", title: "Rentabilidad por trago", desc: "Costo, venta, ganancia y margen de cada producto" },
   { href: "/api/reportes/pedido", title: "Pedido a proveedores", desc: "Ítems pendientes agrupados por proveedor" },
   { href: "/api/reportes/cristaleria", title: "Cristalería y Vajilla", desc: "Control mensual por ubicación (Barra/Depósito), todas las semanas del mes" },
+  { href: "/api/reportes/heladeras", title: "Heladeras", desc: "Temperaturas de la semana actual, estado por unidad e incidencias" },
+  { href: "/api/reportes/inventario-barra", title: "Inventario de Barra", desc: "Sistema de puntos de la semana actual — botellas abiertas por categoría" },
 ];
 
 export default function ReportesPage() {

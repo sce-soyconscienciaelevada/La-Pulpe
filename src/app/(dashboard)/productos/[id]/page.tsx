@@ -46,6 +46,7 @@ export default async function EditProductoPage({ params }: { params: Promise<{ i
             showOnQuickGrid: product.showOnQuickGrid,
             primarySupplierId: product.primarySupplierId,
             reorderThreshold: product.reorderThreshold,
+            countingServingsPerContainer: product.countingServingsPerContainer,
           }}
           submitLabel="Guardar cambios"
         />

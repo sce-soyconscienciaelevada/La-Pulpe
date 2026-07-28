@@ -1,6 +1,6 @@
 # Feedback -> n8n -> Telegram/WhatsApp notification -- build SOP
 
-**Status: not built yet.** The app side is fully ready and already deployed -- it fires a webhook on every feedback submission. This doc is everything needed to build the n8n side, whenever there's a session with n8n MCP loaded (`/mcp-toggle` -> enable n8n -> restart), or to hand-build it in the n8n UI directly.
+**Status (2026-07-28): text notification LIVE and confirmed working**, against a new dedicated "Bar Mgmt Telegram bot" (not the shared OS bot originally proposed -- Joan created a separate one). `barmgmt-feedback-notify.json` now also includes a screenshot-as-photo path (Has Screenshot? -> Decode Screenshot -> Telegram Send Photo) -- this addition is new and **not yet tested live**, run the checklist in `_meta.setup_checklist_for_this_update` before trusting it. The original text-only path is unchanged and already proven.
 
 ## What already exists (app side, live)
 
@@ -71,4 +71,4 @@ paste the n8n webhook's Production URL for both. Then redeploy (`vercel --prod` 
 - Telegram vs WhatsApp (recommendation: Telegram, see above).
 - Which n8n instance: Joan's existing agency instance works fine for this even though Bar Management is Joan's own separate product, not an agency client -- it's just an outbound webhook target, doesn't create any real coupling. A dedicated instance is not necessary for this scale. Confirm the current instance URL before use -- it has moved before.
 - Whether to eventually include the screenshot in the notification (would need a small new endpoint, not built -- text-only first version is the pragmatic v1).
-<!-- updated: 2026-07-22 13:08 -->
+<!-- updated: 2026-07-28 13:38 -->

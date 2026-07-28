@@ -8,9 +8,11 @@ import { SignOutButton } from "./SignOutButton";
 const NAV = [
   { href: "/", label: "Inicio", icon: "🏠" },
   { href: "/inventario", label: "Inventario", icon: "📦" },
+  { href: "/inventario-barra", label: "Inventario de Barra", icon: "🥃" },
   { href: "/registro", label: "Registro diario", icon: "🍸" },
   { href: "/stock", label: "Stock semanal", icon: "📋" },
   { href: "/cristaleria", label: "Cristalería y Vajilla", icon: "🥂" },
+  { href: "/heladeras", label: "Heladeras", icon: "🧊" },
   { href: "/compras", label: "Compras & Pedidos", icon: "🚚" },
   { href: "/productos", label: "Productos", icon: "🏷️" },
   { href: "/costeo", label: "Costeo & Recetas", icon: "🧪" },
@@ -19,6 +21,7 @@ const NAV = [
   { href: "/proveedores", label: "Proveedores", icon: "🤝" },
   { href: "/reportes", label: "Reportes", icon: "🖨️" },
   { href: "/estadisticas", label: "Estadísticas", icon: "📈" },
+  { href: "/ventas-pos", label: "Ventas POS", icon: "🧾" },
   { href: "/feedback", label: "Feedback", icon: "💬" },
   { href: "/ajustes", label: "Ajustes", icon: "⚙️" },
 ];

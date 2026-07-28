@@ -33,6 +33,7 @@ export async function createFeedback(input: {
     title: input.title.trim(),
     description: input.description.trim(),
     venueName: venue.name,
+    screenshotDataUrl: input.screenshotDataUrl || undefined,
   });
 
   revalidatePath("/feedback");

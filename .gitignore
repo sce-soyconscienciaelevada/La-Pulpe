@@ -25,6 +25,7 @@ yarn-error.log*
 
 # env files
 .env*
+barmgmt.local.secrets
 
 # vercel
 .vercel

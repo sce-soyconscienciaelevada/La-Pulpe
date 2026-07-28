@@ -12,6 +12,11 @@ function num(formData: FormData, key: string): number | null {
   return Number.isNaN(n) ? null : n;
 }
 
+function int(formData: FormData, key: string): number | null {
+  const n = num(formData, key);
+  return n === null ? null : Math.round(n);
+}
+
 export async function createProduct(formData: FormData) {
   await requireAdmin();
   const venue = await prisma.venue.findFirstOrThrow();
@@ -30,6 +35,7 @@ export async function createProduct(formData: FormData) {
       showOnQuickGrid: formData.get("showOnQuickGrid") === "on",
       primarySupplierId: (formData.get("primarySupplierId") as string) || null,
       reorderThreshold: num(formData, "reorderThreshold"),
+      countingServingsPerContainer: int(formData, "countingServingsPerContainer"),
     },
   });
   revalidatePath("/productos");
@@ -53,6 +59,7 @@ export async function updateProduct(id: string, formData: FormData) {
       showOnQuickGrid: formData.get("showOnQuickGrid") === "on",
       primarySupplierId: (formData.get("primarySupplierId") as string) || null,
       reorderThreshold: num(formData, "reorderThreshold"),
+      countingServingsPerContainer: int(formData, "countingServingsPerContainer"),
     },
   });
 

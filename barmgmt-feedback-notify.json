@@ -1,0 +1,138 @@
+{
+  "name": "Bar Mgmt — Feedback Notify",
+  "nodes": [
+    {
+      "id": "node-webhook",
+      "name": "Webhook — Feedback Submitted",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [180, 300],
+      "webhookId": "barmgmt-feedback",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "barmgmt-feedback",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-format",
+      "name": "Format Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [420, 300],
+      "parameters": {
+        "jsCode": "// ── Bar Mgmt: Feedback Notify — payload normalizer ──────────\n// Receives POST from src/lib/notify.ts (createFeedback action)\n// Payload: { type, title, description, venueName, source, sentAt, screenshotDataUrl? }\n// Some n8n versions wrap the body under `.body`, others flatten it —\n// handle both (same defensive pattern used in w3-assessment-intake.json).\n// screenshotDataUrl is OPTIONAL — only present when Pablo pasted a screenshot.\n// ─────────────────────────────────────────────────────────────\n\nconst body = $input.first().json.body || $input.first().json;\n\nconst type              = body.type              || 'OTHER';\nconst title             = body.title             || '(sin título)';\nconst description       = body.description       || '';\nconst venueName         = body.venueName         || 'Bar Management';\nconst sentAt            = body.sentAt            || new Date().toISOString();\nconst screenshotDataUrl = body.screenshotDataUrl || null;\n\nconst message = `New feedback on ${venueName}\\n\\n${type} — ${title}\\n\\n${description}`;\n\nreturn [{\n  json: { message, type, title, description, venueName, sentAt, screenshotDataUrl, hasScreenshot: !!screenshotDataUrl }\n}];"
+      }
+    },
+    {
+      "id": "node-if-screenshot",
+      "name": "Has Screenshot?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [660, 300],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.hasScreenshot }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "node-decode-screenshot",
+      "name": "Decode Screenshot",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 200],
+      "parameters": {
+        "jsCode": "// Turns the base64 data: URI (FeedbackItem.screenshotDataUrl) into real\n// binary so the Telegram node can send it as a photo, not just a text link.\n// Client-side compression already caps this at roughly 1000px wide / JPEG\n// q0.75 (see src/app/(dashboard)/feedback/FeedbackClient.tsx), so it should\n// always be small enough for a normal sendPhoto call.\n\nconst item = $input.first();\nconst dataUrl = item.json.screenshotDataUrl;\n\nconst match = /^data:(.+);base64,(.*)$/.exec(dataUrl);\nif (!match) {\n  // Malformed data URL — fall back to text-only rather than fail the run.\n  return [{ json: { ...item.json, hasScreenshot: false } }];\n}\n\nconst mimeType = match[1];\nconst base64 = match[2];\nconst buffer = Buffer.from(base64, 'base64');\n\nreturn [{\n  json: item.json,\n  binary: {\n    data: await this.helpers.prepareBinaryData(buffer, 'feedback-screenshot.jpg', mimeType)\n  }\n}];"
+      }
+    },
+    {
+      "id": "node-telegram-photo",
+      "name": "Telegram — Send Screenshot",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1140, 200],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendPhoto",
+        "chatId": "1204582527",
+        "binaryData": true,
+        "binaryPropertyName": "data",
+        "additionalFields": { "caption": "={{ $json.message }}" }
+      },
+      "credentials": {
+        "telegramApi": { "name": "Bar Mgmt Telegram bot" }
+      }
+    },
+    {
+      "id": "node-telegram-text",
+      "name": "Telegram — Notify Joan",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [900, 400],
+      "parameters": {
+        "chatId": "1204582527",
+        "text": "={{ $json.message }}",
+        "additionalFields": {}
+      },
+      "credentials": {
+        "telegramApi": { "name": "Bar Mgmt Telegram bot" }
+      }
+    },
+    {
+      "id": "node-respond",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1380, 300],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"ok\": true}",
+        "options": { "responseCode": 200 }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook — Feedback Submitted": { "main": [[{ "node": "Format Message", "type": "main", "index": 0 }]] },
+    "Format Message": { "main": [[{ "node": "Has Screenshot?", "type": "main", "index": 0 }]] },
+    "Has Screenshot?": {
+      "main": [
+        [{ "node": "Decode Screenshot", "type": "main", "index": 0 }],
+        [{ "node": "Telegram — Notify Joan", "type": "main", "index": 0 }]
+      ]
+    },
+    "Decode Screenshot": { "main": [[{ "node": "Telegram — Send Screenshot", "type": "main", "index": 0 }]] },
+    "Telegram — Send Screenshot": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]] },
+    "Telegram — Notify Joan": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]] }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "_meta": {
+    "workflow": "Bar Management — Feedback Notify",
+    "purpose": "Pablo submits feedback in the Bar Management app → Joan gets a Telegram ping, with the pasted screenshot attached as an image when there is one. Full context: FEEDBACK-NOTIFY-N8N-SOP.md in this same folder.",
+    "status_2026-07-28": "Text notification confirmed WORKING LIVE against a new dedicated Bar Mgmt Telegram bot. This update adds the screenshot-as-photo path (Has Screenshot? then Decode Screenshot then Telegram Send Photo), which is NEW and not yet tested — the nodes that already work (Webhook, Format Message text path, Respond 200) are left exactly as they were.",
+    "webhook_url_pattern": "https://os-system-n8n.vwgkws.easypanel.host/webhook/barmgmt-feedback (already confirmed live — same URL, no change needed in Vercel)",
+    "setup_checklist_for_this_update": [
+      "1. Open the already-live 'Bar Mgmt — Feedback Notify' workflow in n8n (do not create a second workflow).",
+      "2. Add 3 new nodes: 'Has Screenshot?' (IF, boolean check on hasScreenshot), 'Decode Screenshot' (Code), 'Telegram — Send Screenshot' (Telegram, resource=message, operation=sendPhoto, binaryPropertyName=data, caption={{$json.message}}) — or simplest: delete the whole workflow and re-import this file fresh, because the credential is already set up and n8n will just ask you to re-select it for the new nodes.",
+      "2b. Update the 'Format Message' node's code to the new version in this file (adds screenshotDataUrl/hasScreenshot passthrough) — required for the IF node to have something to check.",
+      "3. Rewire: Format Message to Has Screenshot? then, if true, Decode Screenshot to Telegram Send Screenshot to Respond 200; if false, Telegram — Notify Joan (existing node, left as-is) to Respond 200.",
+      "4. On 'Telegram — Send Screenshot', assign the same 'Bar Mgmt Telegram bot' credential already working on the text node.",
+      "5. Save + confirm still Active.",
+      "6. Test: submit feedback in the app WITH a pasted screenshot to confirm the photo arrives in Telegram with the caption. Then submit one WITHOUT a screenshot to confirm the old text-only behavior still works exactly as before.",
+      "7. Delete both test feedback items afterward (same DB-script pattern used throughout this project)."
+    ],
+    "open_decision": "Telegram bot: dedicated 'Bar Mgmt Telegram bot' created and confirmed working 2026-07-28 (not the shared OS bot originally proposed)."
+  }
+}
