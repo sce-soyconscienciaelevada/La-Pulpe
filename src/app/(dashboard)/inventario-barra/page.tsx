@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/ui";
 import { getOrCreateBusinessDay } from "@/lib/register/day";
 import { ensureTodayEntries } from "@/lib/bar-inventory";
 import { InventarioBarraTable } from "./InventarioBarraTable";
+import { ColumnGlossary } from "./ColumnGlossary";
 
 export default async function InventarioBarraPage() {
   const venue = await prisma.venue.findFirstOrThrow();
@@ -57,10 +58,9 @@ export default async function InventarioBarraPage() {
         </p>
       ) : (
         <>
+          <ColumnGlossary />
           <p className="text-xs text-text-muted mb-3">
             Ej: "2 cerradas + abierta (7/10)" = 2 botellas selladas más una en uso, marcada en 7 de sus 10 puntos.
-            "Exist." se corrige a mano si el conteo real no coincide — se toma del stock de Inventario la
-            primera vez que aparece un producto acá, después se calcula solo día a día.
           </p>
           <InventarioBarraTable groups={Array.from(groups.entries()).map(([name, items]) => ({ name, items }))} />
         </>
