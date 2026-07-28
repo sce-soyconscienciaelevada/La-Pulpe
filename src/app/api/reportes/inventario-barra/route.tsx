@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 9, fontWeight: 700, backgroundColor: "#1c202a", color: "#fff", padding: 3, marginBottom: 3 },
   headerRow: { flexDirection: "row", backgroundColor: "#eee", fontWeight: 700, borderBottom: "1px solid #999" },
   row: { flexDirection: "row", borderBottom: "0.5px solid #ccc" },
-  cellProduct: { width: 110, padding: 2 },
+  cellProduct: { width: 135, padding: 2 },
   cellDay: { width: 55, padding: 2, textAlign: "center" },
 });
 
@@ -60,7 +60,7 @@ export async function GET(request: Request) {
         <Text style={styles.title}>{venue.name.toUpperCase()}</Text>
         <Text style={styles.subtitle}>Inventario de Barra — Sistema de Puntos</Text>
         <Text style={styles.weekLabel}>Semana {formatWeekLabel(weekDates)}</Text>
-        <Text style={styles.weekLabel}>N = piezas cerradas. N+X/10 = N cerradas más una abierta marcada en X de sus 10 puntos.</Text>
+        <Text style={styles.weekLabel}>N = piezas cerradas. N+X/T = N cerradas más una abierta marcada en X de sus T puntos configurados (T junto al nombre).</Text>
 
         {Array.from(groups.entries()).map(([categoryName, items]) => (
           <View key={categoryName} style={styles.section} wrap={false}>
@@ -74,13 +74,17 @@ export async function GET(request: Request) {
             </View>
             {items.map((product) => (
               <View key={product.id} style={styles.row}>
-                <Text style={styles.cellProduct}>{product.name}</Text>
+                <Text style={styles.cellProduct}>
+                  {product.name} (T={product.countingServingsPerContainer})
+                </Text>
                 {weekDates.map((day) => {
                   const e = entryFor(product.id, day);
                   const teorico = e ? computeFinalTeorico(e.initialQuantity, e.entradas, e.ventaPunto) : null;
                   return (
                     <Text key={dateKey(day)} style={styles.cellDay}>
-                      {teorico !== null ? formatClosedOpenCompact(teorico) : "—"}
+                      {teorico !== null
+                        ? formatClosedOpenCompact(teorico, product.countingServingsPerContainer ?? 10)
+                        : "—"}
                     </Text>
                   );
                 })}
@@ -88,7 +92,7 @@ export async function GET(request: Request) {
                   {(() => {
                     const last = entryFor(product.id, weekDates[6]);
                     return last?.countedPhysical !== null && last?.countedPhysical !== undefined
-                      ? formatClosedOpenCompact(last.countedPhysical)
+                      ? formatClosedOpenCompact(last.countedPhysical, product.countingServingsPerContainer ?? 10)
                       : "—";
                   })()}
                 </Text>

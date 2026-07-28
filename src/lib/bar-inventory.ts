@@ -30,19 +30,24 @@ export function splitClosedOpen(totalQuantity: number): { closedPiezas: number; 
   return { closedPiezas, openFraction };
 }
 
-export function formatClosedOpen(totalQuantity: number): string {
+// `totalPoints` is the product's own configured scale (Product.countingServingsPerContainer,
+// e.g. 10 per the SOP default, but Joan can set a different value per product) — the
+// denominator must always match that, never assume 10, or a product configured
+// differently would show a wrong fraction and stop being comparable to Referencia Registro
+// (which already divides by the real per-product count).
+export function formatClosedOpen(totalQuantity: number, totalPoints: number = 10): string {
   const { closedPiezas, openFraction } = splitClosedOpen(totalQuantity);
   if (openFraction < 0.05) return `${closedPiezas} cerrada${closedPiezas === 1 ? "" : "s"}`;
-  const puntos = Math.round(openFraction * 10);
-  return `${closedPiezas} cerrada${closedPiezas === 1 ? "" : "s"} + abierta (${puntos}/10)`;
+  const puntos = Math.round(openFraction * totalPoints);
+  return `${closedPiezas} cerrada${closedPiezas === 1 ? "" : "s"} + abierta (${puntos}/${totalPoints})`;
 }
 
 // Compact form for narrow PDF table columns, e.g. "2 + 7/10" or just "2".
-export function formatClosedOpenCompact(totalQuantity: number): string {
+export function formatClosedOpenCompact(totalQuantity: number, totalPoints: number = 10): string {
   const { closedPiezas, openFraction } = splitClosedOpen(totalQuantity);
   if (openFraction < 0.05) return `${closedPiezas}`;
-  const puntos = Math.round(openFraction * 10);
-  return `${closedPiezas}+${puntos}/10`;
+  const puntos = Math.round(openFraction * totalPoints);
+  return `${closedPiezas}+${puntos}/${totalPoints}`;
 }
 
 // Auto-provisions today's BarInventoryEntry for every point-tracked product,

@@ -30,12 +30,16 @@ function finalTeorico(row: { initialQuantity: number; entradas: number; ventaPun
 // puntos remain). Kept local to this Client Component (not imported from
 // lib/bar-inventory.ts) to avoid pulling Prisma into the browser bundle —
 // same reason HeladerasTable/VentasPosClient split their helpers out.
-function formatClosedOpen(totalQuantity: number): string {
+// totalPoints comes from the product's own Puntos de conteo (never hardcoded
+// to 10) — a product configured differently must show that real denominator,
+// or this stops lining up with Referencia Registro, which already divides by
+// the real per-product count.
+function formatClosedOpen(totalQuantity: number, totalPoints: number): string {
   const closedPiezas = Math.floor(totalQuantity + 1e-9);
   const openFraction = Math.max(0, totalQuantity - closedPiezas);
   if (openFraction < 0.05) return `${closedPiezas} cerrada${closedPiezas === 1 ? "" : "s"}`;
-  const puntos = Math.round(openFraction * 10);
-  return `${closedPiezas} cerrada${closedPiezas === 1 ? "" : "s"} + abierta (${puntos}/10)`;
+  const puntos = Math.round(openFraction * totalPoints);
+  return `${closedPiezas} cerrada${closedPiezas === 1 ? "" : "s"} + abierta (${puntos}/${totalPoints})`;
 }
 
 export function InventarioBarraTable({ groups }: { groups: Group[] }) {
@@ -93,9 +97,18 @@ export function InventarioBarraTable({ groups }: { groups: Group[] }) {
                 const countedDraft = valueFor(row, "countedPhysical");
                 const counted = countedDraft === "" ? null : Number(countedDraft);
                 const variance = counted === null || Number.isNaN(counted) ? null : counted - teorico;
+                const totalPoints = row.countingServingsPerContainer ?? 10;
+                const teoricoOpenFraction = Math.max(0, teorico - Math.floor(teorico + 1e-9));
+                // Flags the exact moment Paso 3 of the SOP calls out: the open
+                // bottle's fraction hit 0 because of today's consumption (not
+                // just "nobody opened one yet") — time to start a new pieza.
+                const agotada = row.ventaPunto > 0 && teoricoOpenFraction < 0.05;
                 return (
                   <tr key={row.id} className="border-b border-border">
-                    <td className="px-3 py-2 text-text whitespace-nowrap">{row.productName}</td>
+                    <td className="px-3 py-2 text-text whitespace-nowrap">
+                      {row.productName}
+                      <div className="text-[10px] text-text-muted">{totalPoints} puntos/botella</div>
+                    </td>
                     <td className="px-1 py-1">
                       <input
                         type="number"
@@ -106,7 +119,7 @@ export function InventarioBarraTable({ groups }: { groups: Group[] }) {
                         className="w-16 rounded-lg border border-border bg-bg-elevated px-2 py-1 text-sm text-text text-center outline-none focus:border-accent"
                       />
                       <div className="text-[10px] text-text-muted text-center mt-0.5 whitespace-nowrap">
-                        {formatClosedOpen(row.initialQuantity)}
+                        {formatClosedOpen(row.initialQuantity, totalPoints)}
                       </div>
                     </td>
                     <td className="px-1 py-1">
@@ -130,10 +143,19 @@ export function InventarioBarraTable({ groups }: { groups: Group[] }) {
                       />
                     </td>
                     <td className="px-2 py-2 text-center font-medium text-text whitespace-nowrap">
-                      {formatClosedOpen(teorico)}
+                      {formatClosedOpen(teorico, totalPoints)}
+                      {agotada && (
+                        <div className="mt-1">
+                          <Badge tone="comp">🆕 abrir botella nueva</Badge>
+                        </div>
+                      )}
                     </td>
                     <td className="px-2 py-2 text-center text-text-muted">
-                      {row.registroReference !== null ? row.registroReference.toFixed(1) : "—"}
+                      {row.registroReference !== null ? (
+                        row.registroReference.toFixed(1)
+                      ) : (
+                        <span className="italic">sin ventas hoy</span>
+                      )}
                     </td>
                     <td className="px-1 py-1">
                       <input
@@ -142,12 +164,15 @@ export function InventarioBarraTable({ groups }: { groups: Group[] }) {
                         value={valueFor(row, "countedPhysical")}
                         onChange={(e) => setDrafts({ ...drafts, [fieldKey(row.id, "countedPhysical")]: e.target.value })}
                         onBlur={(e) => save(row, "countedPhysical", e.target.value)}
-                        className="w-16 rounded-lg border border-border bg-bg-elevated px-2 py-1 text-sm text-text text-center outline-none focus:border-accent"
+                        placeholder="al cierre"
+                        className="w-16 rounded-lg border border-border bg-bg-elevated px-2 py-1 text-sm text-text text-center outline-none focus:border-accent placeholder:text-[10px]"
                       />
-                      {counted !== null && !Number.isNaN(counted) && (
+                      {counted !== null && !Number.isNaN(counted) ? (
                         <div className="text-[10px] text-text-muted text-center mt-0.5 whitespace-nowrap">
-                          {formatClosedOpen(counted)}
+                          {formatClosedOpen(counted, totalPoints)}
                         </div>
+                      ) : (
+                        <div className="text-[10px] text-text-muted text-center mt-0.5">opcional</div>
                       )}
                     </td>
                     <td className="px-2 py-2 text-center">
