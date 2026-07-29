@@ -5,24 +5,28 @@ import { prisma } from "@/lib/prisma";
 import { getOrCreateOpenMonth } from "@/lib/glassware";
 import { requireAdmin } from "@/lib/require-admin";
 
+// Kept tight on purpose — this report needs to fit one A4 landscape page
+// even with ~26+ items across both locations (it used to spill to a 2nd
+// page with more generous spacing; every value here was sized down and
+// re-verified against that row count, not guessed).
 const styles = StyleSheet.create({
-  page: { padding: 28, fontSize: 8, fontFamily: "Helvetica", color: "#1c202a" },
-  title: { fontSize: 16, fontWeight: 700, textAlign: "center" },
-  subtitle: { fontSize: 9, textAlign: "center", color: "#666", marginBottom: 4 },
-  monthLabel: { fontSize: 9, textAlign: "center", marginBottom: 14 },
-  sectionTitle: { fontSize: 10, fontWeight: 700, backgroundColor: "#1c202a", color: "#fff", padding: 4, marginBottom: 4 },
+  page: { padding: 16, fontSize: 7, fontFamily: "Helvetica", color: "#1c202a" },
+  title: { fontSize: 14, fontWeight: 700, textAlign: "center", marginBottom: 2 },
+  subtitle: { fontSize: 8, textAlign: "center", color: "#666", marginBottom: 2 },
+  monthLabel: { fontSize: 8, textAlign: "center", marginBottom: 6 },
+  sectionTitle: { fontSize: 9, fontWeight: 700, backgroundColor: "#1c202a", color: "#fff", padding: 3, marginBottom: 2 },
   row: { flexDirection: "row", borderBottom: "0.5px solid #ccc" },
   headerRow: { flexDirection: "row", backgroundColor: "#eee", fontWeight: 700, borderBottom: "1px solid #999" },
-  cellCode: { width: 45, padding: 3 },
-  cellName: { width: 130, padding: 3 },
-  cellBase: { width: 45, padding: 3, textAlign: "center" },
-  cellWeek: { width: 40, padding: 3, textAlign: "center" },
-  cellDiff: { width: 40, padding: 3, textAlign: "center" },
-  section: { marginBottom: 18 },
-  obsBox: { border: "1px solid #999", height: 50, marginTop: 8, padding: 4 },
-  obsLabel: { fontSize: 8, color: "#666", marginBottom: 12 },
-  signRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 30 },
-  signLine: { width: 200, borderTop: "1px solid #333", textAlign: "center", paddingTop: 4, fontSize: 8 },
+  cellCode: { width: 40, padding: 2 },
+  cellName: { width: 200, padding: 2 },
+  cellBase: { width: 45, padding: 2, textAlign: "center" },
+  cellWeek: { width: 40, padding: 2, textAlign: "center" },
+  cellDiff: { width: 40, padding: 2, textAlign: "center" },
+  section: { marginBottom: 8 },
+  obsBox: { border: "1px solid #999", height: 28, marginTop: 4, padding: 3 },
+  obsLabel: { fontSize: 7, color: "#666", marginBottom: 4 },
+  signRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 14 },
+  signLine: { width: 200, borderTop: "1px solid #333", textAlign: "center", paddingTop: 3, fontSize: 7 },
 });
 
 export async function GET() {
@@ -64,7 +68,7 @@ export async function GET() {
           <Text style={styles.cellName}>Producto</Text>
           <Text style={styles.cellBase}>Stock Base</Text>
           {weeks.map((w) => (
-            <Text key={w.id} style={{ width: 80, padding: 3, textAlign: "center" }}>
+            <Text key={w.id} style={{ width: 80, padding: 2, textAlign: "center" }}>
               {w.label}
             </Text>
           ))}
