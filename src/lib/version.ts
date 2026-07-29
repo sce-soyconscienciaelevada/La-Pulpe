@@ -1,9 +1,20 @@
 // Bump this string on every deploy that should trigger the "actualización
 // disponible" banner + "what's new" popup. Add a matching CHANGELOG entry --
 // that's what the popup shows. See TECHNICAL-GUIDE.md's deploy checklist.
-export const APP_VERSION = "2026-07-28.2";
+export const APP_VERSION = "2026-07-28.3";
 
 export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
+  "2026-07-28.3": {
+    title: "Mejoras en Inventario de Barra + reporte de Cristalería",
+    items: [
+      "Inventario de Barra: ahora se ve clarito cuántas botellas cerradas hay y cuánto le queda a la abierta (ej: \"2 cerradas + abierta 7/10\")",
+      "Inventario de Barra: la Existencia inicial se puede corregir a mano si no coincide con lo que hay realmente",
+      "Inventario de Barra: las columnas ahora se llaman igual que en la planilla de papel (Exist., Ent., Venta x Punto, etc.)",
+      "Inventario de Barra: aviso nuevo cuando una botella se termina, para abrir una nueva",
+      "Inventario de Barra: agregamos una ayuda (❓) que explica qué significa cada columna",
+      "Reporte de Cristalería y Vajilla: ahora imprime en una sola hoja",
+    ],
+  },
   "2026-07-28.2": {
     title: "Botón de novedades (🔔)",
     items: [
