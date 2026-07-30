@@ -1,9 +1,17 @@
 // Bump this string on every deploy that should trigger the "actualización
 // disponible" banner + "what's new" popup. Add a matching CHANGELOG entry --
 // that's what the popup shows. See TECHNICAL-GUIDE.md's deploy checklist.
-export const APP_VERSION = "2026-07-30.3";
+export const APP_VERSION = "2026-07-30.4";
 
 export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
+  "2026-07-30.4": {
+    title: "Menú lateral renovado + buscador rápido",
+    items: [
+      "Los emojis del menú se reemplazaron por íconos más profesionales",
+      "El menú ahora está organizado en grupos (Operación, Stock, Catálogo, Análisis, Sistema) en vez de una lista larga",
+      "Nuevo buscador rápido — hacé click en \"Buscar\" o apretá Ctrl K (⌘K en Mac) para saltar a cualquier sección escribiendo su nombre",
+    ],
+  },
   "2026-07-30.3": {
     title: "Nuevo estilo en tarjetas y cifras del Inicio",
     items: [
