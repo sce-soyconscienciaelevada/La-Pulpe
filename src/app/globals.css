@@ -1,33 +1,55 @@
 @import "tailwindcss";
 
+/* Palette — "Salón" (Mockup D), dark only for now. See
+   _design/dashboards/barmgmt-premium/pages/mockup-d-salon.html for the
+   source of truth; light mode + toggle is a later phase, not this one.
+   Variable NAMES kept stable on purpose so every existing consumer
+   (38 files import ui.tsx primitives that read these) repaints for free —
+   only the VALUES changed here. New tokens (bg-subtle, border-soft,
+   text-faint, ramp-1..4) are added ahead of the primitives/widgets that
+   will use them in later phases. */
 :root {
-  --bg: #0f1115;
-  --bg-elevated: #171a21;
-  --bg-card: #1c202a;
-  --border: #2a2f3a;
-  --text: #e8e9ec;
-  --text-muted: #9aa0ac;
-  --accent: #c89b3c;
-  --accent-soft: #c89b3c26;
-  --profit: #4caf7d;
-  --profit-soft: #4caf7d22;
-  --loss: #e0575b;
-  --loss-soft: #e0575b22;
-  --comp: #4a90d9;
-  --comp-soft: #4a90d922;
+  --bg: #131211;
+  --bg-elevated: #1b1a18;
+  --bg-card: #1b1a18;
+  --bg-subtle: #232120;
+  --border: #322f2c;
+  --border-soft: #262421;
+  --text: #f0ede7;
+  --text-muted: #a59f96;
+  --text-faint: #7a746c;
+  --accent: #8fc2d1;
+  --accent-soft: #8fc2d126;
+  --profit: #5fbd8f;
+  --profit-soft: #5fbd8f22;
+  --loss: #e5737b;
+  --loss-soft: #e5737b22;
+  --comp: #d9a44b;
+  --comp-soft: #d9a44b22;
+  --ramp-1: #8fc2d1;
+  --ramp-2: #6fa3b3;
+  --ramp-3: #52818f;
+  --ramp-4: #3a5f6a;
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-bg-elevated: var(--bg-elevated);
   --color-bg-card: var(--bg-card);
+  --color-bg-subtle: var(--bg-subtle);
   --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
   --color-text: var(--text);
   --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
   --color-accent: var(--accent);
   --color-profit: var(--profit);
   --color-loss: var(--loss);
   --color-comp: var(--comp);
+  --color-ramp-1: var(--ramp-1);
+  --color-ramp-2: var(--ramp-2);
+  --color-ramp-3: var(--ramp-3);
+  --color-ramp-4: var(--ramp-4);
   --font-sans: var(--font-inter);
 }
 
