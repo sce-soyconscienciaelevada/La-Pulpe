@@ -1,9 +1,16 @@
 // Bump this string on every deploy that should trigger the "actualización
 // disponible" banner + "what's new" popup. Add a matching CHANGELOG entry --
 // that's what the popup shows. See TECHNICAL-GUIDE.md's deploy checklist.
-export const APP_VERSION = "2026-07-30.2";
+export const APP_VERSION = "2026-07-30.3";
 
 export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
+  "2026-07-30.3": {
+    title: "Nuevo estilo en tarjetas y cifras del Inicio",
+    items: [
+      "Los números principales del Inicio ahora se ven con una tipografía más elegante",
+      "Las cuatro cifras de arriba (Ventas, Ganancia, Dueños/cortesía, Tragos) ahora comparten un mismo panel en vez de tarjetas separadas",
+    ],
+  },
   "2026-07-30.2": {
     title: "Preparando la nueva tipografía",
     items: [

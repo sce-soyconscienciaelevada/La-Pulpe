@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getOrCreateBusinessDay, getDaySummary } from "@/lib/register/day";
 import { computePricing } from "@/lib/pricing";
-import { PageHeader, Card, StatTile, formatARS, Badge } from "@/components/ui";
+import { PageHeader, Card, KpiBox, Kpi, formatARS, Badge } from "@/components/ui";
 import Link from "next/link";
 
 export default async function InicioPage() {
@@ -42,11 +42,28 @@ export default async function InicioPage() {
     <div>
       <PageHeader title="Inicio" subtitle={new Date().toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" })} />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <StatTile label="Ventas del día" value={formatARS(summary.revenue)} />
-        <StatTile label="Ganancia del día" value={formatARS(summary.profit)} tone={summary.profit >= 0 ? "profit" : "loss"} />
-        <StatTile label="Consumo dueños/cortesía" value={formatARS(summary.byType.OWNER.reduce((s,c)=>s+c.quantity*c.unitCost,0) + summary.byType.COMP.reduce((s,c)=>s+c.quantity*c.unitCost,0))} tone="comp" />
-        <StatTile label="Tragos servidos hoy" value={String(summary.consumptions.length)} />
+      {/* Minimal swap to the new KpiBox/Kpi primitives — same data as before.
+          Delta lines (vs. yesterday, vs. last week) come in a later phase
+          once the comparison queries exist; Kpi's `delta` prop is optional
+          so this renders cleanly without them for now. */}
+      <div className="mb-6">
+        <KpiBox>
+          <Kpi label="Ventas del día" value={formatARS(summary.revenue)} />
+          <Kpi
+            label="Ganancia del día"
+            value={formatARS(summary.profit)}
+            tone={summary.profit >= 0 ? "profit" : "loss"}
+          />
+          <Kpi
+            label="Consumo dueños/cortesía"
+            value={formatARS(
+              summary.byType.OWNER.reduce((s, c) => s + c.quantity * c.unitCost, 0) +
+                summary.byType.COMP.reduce((s, c) => s + c.quantity * c.unitCost, 0)
+            )}
+            tone="comp"
+          />
+          <Kpi label="Tragos servidos hoy" value={String(summary.consumptions.length)} />
+        </KpiBox>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-4">
