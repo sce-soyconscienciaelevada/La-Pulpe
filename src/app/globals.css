@@ -51,6 +51,18 @@
   --color-ramp-3: var(--ramp-3);
   --color-ramp-4: var(--ramp-4);
   --font-sans: var(--font-inter);
+
+  /* Two new type roles, overriding Tailwind v4's built-in generic defaults
+     for these same theme keys: display serif for headings/headline figures,
+     mono for tabular data. Deliberately system-font stacks for now (matches
+     what Joan approved in the mockup) rather than loading a real serif via
+     next/font — that's a separate later decision, not bundled into this
+     port. "inline" mode means these are also emitted as real CSS custom
+     properties, so `var(--font-serif)`/`var(--font-mono)` work directly in
+     any component's own styles, not just via Tailwind's font-serif/font-mono
+     utility classes. */
+  --font-serif: "Palatino Linotype", Palatino, "Book Antiqua", "Iowan Old Style", Georgia, ui-serif, serif;
+  --font-mono: Consolas, "SF Mono", "JetBrains Mono", ui-monospace, "Liberation Mono", monospace;
 }
 
 body {
