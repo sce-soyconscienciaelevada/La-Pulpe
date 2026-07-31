@@ -63,3 +63,21 @@ export function startOfDayInTz(instant: Date, timeZone: string = VENUE_TZ): Date
 export function todayInTz(timeZone: string = VENUE_TZ): Date {
   return startOfDayInTz(new Date(), timeZone);
 }
+
+// Parses a "YYYY-MM-DD" string (e.g. a `?week=` query param built client-side
+// by dateKey()/toISOString().slice(0,10)) as the literal calendar date it
+// names, in `timeZone` — NOT as `new Date(`${key}T00:00:00`)`, which parses
+// as the SERVER's local time. On Vercel (UTC), that reinterprets the string
+// one day early once converted to Cordoba (UTC-3): "2026-08-03T00:00:00" is
+// parsed as 03:00 UTC on Aug 3, which is 21:00 in Cordoba on Aug 2 — a whole
+// day off. Round-tripped through getWeekDates()'s Monday-rounding, that bug
+// made "next week" silently resolve back to the current week (found 2026-08,
+// Heladeras' "Semana siguiente" button). Every server-side parse of a
+// date-only key must go through this, not a raw `new Date()` string parse.
+export function dateFromDateOnlyKey(key: string, timeZone: string = VENUE_TZ): Date {
+  const [y, m, d] = key.split("-").map(Number);
+  // Noon UTC on the target date can't roll into an adjacent calendar day in
+  // any real-world timezone, so this is always day D in `timeZone` — then
+  // startOfDayInTz resolves the actual Cordoba-midnight instant for it.
+  return startOfDayInTz(new Date(Date.UTC(y, m - 1, d, 12, 0, 0)), timeZone);
+}

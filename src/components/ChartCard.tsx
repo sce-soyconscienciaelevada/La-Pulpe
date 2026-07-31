@@ -136,7 +136,16 @@ export function ChartCard({
 
     let top = screenY - th - 12;
     if (top < 0) top = screenY + 14;
-    let left = screenX - tw / 2;
+
+    // Centering the tooltip on the point covers the point's own curve segment
+    // when it's near an edge — for a point in the left ~35% of the plot, that
+    // hides the segment leading up to it (looked like the fill/line vanished
+    // on hover). Offset to the side with more room instead of straddling it.
+    const plotFrac = (px - PLOT_LEFT) / (PLOT_RIGHT - PLOT_LEFT || 1);
+    let left: number;
+    if (plotFrac < 0.35) left = screenX + 14;
+    else if (plotFrac > 0.65) left = screenX - tw - 14;
+    else left = screenX - tw / 2;
     const maxLeft = svgBox.width + offsetX - tw;
     if (left < offsetX) left = offsetX;
     if (left > maxLeft) left = Math.max(offsetX, maxLeft);
@@ -224,23 +233,38 @@ export function ChartCard({
             <path d={curPath} fill="var(--accent)" fillOpacity={0.1} />
             <path d={curLine} fill="none" stroke="var(--accent)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
 
-            {hovered && (
-              <>
-                <line
-                  x1={hovered.x}
-                  y1={PLOT_TOP}
-                  x2={hovered.x}
-                  y2={PLOT_BOTTOM}
-                  stroke="var(--text-faint)"
-                  strokeWidth={1}
-                  strokeDasharray="2 3"
-                />
-                {hovered.yPrev !== null && (
-                  <circle cx={hovered.x} cy={hovered.yPrev} r={3} fill="var(--bg-card)" stroke="var(--text-faint)" strokeWidth={1.5} />
-                )}
-                <circle cx={hovered.x} cy={hovered.yCur} r={4} fill="var(--bg-card)" stroke="var(--accent)" strokeWidth={2} />
-              </>
-            )}
+            {/* Always mounted (never conditionally added/removed) — inserting these as
+                new siblings only on hover-start triggered a Chromium repaint glitch that
+                left the fill path partially unpainted until the next interaction. Toggling
+                opacity instead means the DOM never mutates on hover, just attribute values. */}
+            <line
+              x1={hovered?.x ?? 0}
+              y1={PLOT_TOP}
+              x2={hovered?.x ?? 0}
+              y2={PLOT_BOTTOM}
+              stroke="var(--text-faint)"
+              strokeWidth={1}
+              strokeDasharray="2 3"
+              opacity={hovered ? 1 : 0}
+            />
+            <circle
+              cx={hovered?.x ?? 0}
+              cy={hovered?.yPrev ?? 0}
+              r={3}
+              fill="var(--bg-card)"
+              stroke="var(--text-faint)"
+              strokeWidth={1.5}
+              opacity={hovered && hovered.yPrev !== null ? 1 : 0}
+            />
+            <circle
+              cx={hovered?.x ?? 0}
+              cy={hovered?.yCur ?? 0}
+              r={4}
+              fill="var(--bg-card)"
+              stroke="var(--accent)"
+              strokeWidth={2}
+              opacity={hovered ? 1 : 0}
+            />
 
             <g>
               {points.map((p, i) => {

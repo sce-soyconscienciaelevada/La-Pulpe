@@ -12,6 +12,7 @@ import {
   FRIDGE_STATUS_LABEL,
   DAY_LABELS,
 } from "@/lib/fridge-shared";
+import { dateFromDateOnlyKey } from "@/lib/day-boundary";
 
 const styles = StyleSheet.create({
   page: { padding: 28, fontSize: 8, fontFamily: "Helvetica", color: "#1c202a" },
@@ -41,7 +42,7 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const weekParam = searchParams.get("week");
-  const anchor = weekParam ? new Date(`${weekParam}T00:00:00`) : new Date();
+  const anchor = weekParam ? dateFromDateOnlyKey(weekParam) : new Date();
   const weekDates = getWeekDates(anchor);
   const rangeEnd = new Date(weekDates[6]);
   rangeEnd.setDate(rangeEnd.getDate() + 1);

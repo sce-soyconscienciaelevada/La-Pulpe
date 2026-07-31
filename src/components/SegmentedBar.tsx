@@ -44,7 +44,7 @@ export function SegmentedBar({
         {items.map((item) => (
           <li key={item.key} className="flex items-center gap-1.5 text-xs text-text-muted min-w-0">
             <span className="w-2 h-2 rounded-full shrink-0" style={{ background: item.color }} />
-            <span className="truncate">{item.label}</span>
+            <span className="truncate min-w-0 flex-1">{item.label}</span>
             <span className="font-mono text-text-faint tabular-nums shrink-0">
               {((item.value / total) * 100).toFixed(0)}%
             </span>

@@ -1,9 +1,17 @@
 // Bump this string on every deploy that should trigger the "actualización
 // disponible" banner + "what's new" popup. Add a matching CHANGELOG entry --
 // that's what the popup shows. See TECHNICAL-GUIDE.md's deploy checklist.
-export const APP_VERSION = "2026-07-31.3";
+export const APP_VERSION = "2026-07-31.4";
 
 export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
+  "2026-07-31.4": {
+    title: "Arreglo: Heladeras \"semana siguiente\" + gráfico del Inicio",
+    items: [
+      "Heladeras: \"Semana siguiente\" se había quedado pegado en la misma semana por un problema de huso horario en el servidor — ahora avanza bien, semana por semana",
+      "Inicio: el gráfico de ventas a veces se veía \"cortado\" al pasar el mouse — el globito de info tapaba parte de la curva, ahora se corre al costado",
+      "Inicio: la torta de \"Ventas por categoría\" se acomodó para no salirse de su tarjeta en pantallas angostas",
+    ],
+  },
   "2026-07-31.3": {
     title: "Botones clickeables + nombres prolijos + iconos nuevos",
     items: [

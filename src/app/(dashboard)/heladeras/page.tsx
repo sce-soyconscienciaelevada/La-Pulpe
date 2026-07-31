@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/ui";
 import { ensureFridgeUnits } from "@/lib/fridge";
 import { getWeekDates, dateKey } from "@/lib/fridge-shared";
+import { dateFromDateOnlyKey } from "@/lib/day-boundary";
 import { HeladerasTable } from "./HeladerasTable";
 
 export default async function HeladerasPage({
@@ -13,7 +14,7 @@ export default async function HeladerasPage({
   const venue = await prisma.venue.findFirstOrThrow();
   await ensureFridgeUnits(venue.id);
 
-  const anchor = week ? new Date(`${week}T00:00:00`) : new Date();
+  const anchor = week ? dateFromDateOnlyKey(week) : new Date();
   const weekDates = getWeekDates(anchor);
   const weekStart = weekDates[0];
   const weekEnd = weekDates[6];

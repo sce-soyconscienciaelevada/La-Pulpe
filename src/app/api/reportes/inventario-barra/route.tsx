@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/require-admin";
 import { getWeekDates, dateKey, formatWeekLabel, DAY_LABELS } from "@/lib/fridge-shared";
 import { computeFinalTeorico, formatClosedOpenCompact } from "@/lib/bar-inventory";
+import { dateFromDateOnlyKey } from "@/lib/day-boundary";
 
 const styles = StyleSheet.create({
   page: { padding: 24, fontSize: 7, fontFamily: "Helvetica", color: "#1c202a" },
@@ -24,7 +25,7 @@ export async function GET(request: Request) {
   const venue = await prisma.venue.findFirstOrThrow();
   const { searchParams } = new URL(request.url);
   const weekParam = searchParams.get("week");
-  const anchor = weekParam ? new Date(`${weekParam}T00:00:00`) : new Date();
+  const anchor = weekParam ? dateFromDateOnlyKey(weekParam) : new Date();
   const weekDates = getWeekDates(anchor);
 
   const businessDays = await prisma.businessDay.findMany({

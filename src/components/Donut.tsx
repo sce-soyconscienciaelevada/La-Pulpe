@@ -50,7 +50,7 @@ export function Donut({
     .join(", ");
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-6">
+    <div className="flex flex-col items-center gap-4 min-w-0">
       <svg viewBox="0 0 100 100" className="w-36 h-36 shrink-0" role="img" aria-label={ariaLabel}>
         <g transform="rotate(-90 50 50)" fill="none" strokeWidth={13}>
           {segments.map((s) => (
@@ -76,7 +76,7 @@ export function Donut({
         {items.map((item, i) => (
           <li key={item.key} className="flex items-center gap-2 text-xs text-text-muted min-w-0">
             <span className="w-2 h-2 rounded-full shrink-0" style={{ background: RAMP[i % RAMP.length] }} />
-            <span className="truncate">{item.label}</span>
+            <span className="truncate min-w-0 flex-1">{item.label}</span>
             <span className="ml-auto font-mono tabular-nums shrink-0">{formatValue(item.value)}</span>
             <span className="font-mono text-text-faint tabular-nums shrink-0 w-9 text-right">
               {total > 0 ? ((item.value / total) * 100).toFixed(0) : 0}%
