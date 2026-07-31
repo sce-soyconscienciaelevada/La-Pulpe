@@ -220,7 +220,7 @@ export default async function InicioPage() {
         <ChartCard
           headlineLabel="Ventas del período"
           series={chartSeries}
-          formatValue={formatARS}
+          format="currency"
           previousLegend="Período anterior"
           currentLegend="Este período"
         />

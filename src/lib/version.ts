@@ -1,9 +1,15 @@
 // Bump this string on every deploy that should trigger the "actualización
 // disponible" banner + "what's new" popup. Add a matching CHANGELOG entry --
 // that's what the popup shows. See TECHNICAL-GUIDE.md's deploy checklist.
-export const APP_VERSION = "2026-07-30.6";
+export const APP_VERSION = "2026-07-30.7";
 
 export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
+  "2026-07-30.7": {
+    title: "Arreglo: el Inicio no cargaba",
+    items: [
+      "El Inicio tiraba error al abrirlo por una falla del gráfico nuevo — ya está arreglado y todas las secciones cargan bien",
+    ],
+  },
   "2026-07-30.6": {
     title: "Inicio renovado — gráfico, mezcla de consumo y torta por categoría",
     items: [

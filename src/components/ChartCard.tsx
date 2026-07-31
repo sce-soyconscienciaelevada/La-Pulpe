@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { formatARS } from "./ui";
 
 // Ported from the approved mockup
 // (_design/dashboards/barmgmt-premium/pages/mockup-d-salon.html) — same
@@ -31,21 +32,27 @@ function niceTicks(min: number, max: number, count = 4): number[] {
   return Array.from({ length: count }, (_, i) => Math.round(min + step * i));
 }
 
+// `format` is a plain string, not a formatter function: this is a Client
+// Component, and functions cannot cross the Server/Client boundary — passing
+// one throws "Functions cannot be passed directly to Client Components" at
+// request time (which no build or type check catches).
 export function ChartCard({
   title,
   headlineLabel,
   series,
-  formatValue,
+  format = "currency",
   currentLegend = "Este período",
   previousLegend = "Período anterior",
 }: {
   title?: string;
   headlineLabel: string;
   series: ChartSeries[];
-  formatValue: (n: number) => string;
+  format?: "currency" | "number";
   currentLegend?: string;
   previousLegend?: string;
 }) {
+  const formatValue = (n: number) =>
+    format === "currency" ? formatARS(n) : new Intl.NumberFormat("es-AR").format(n);
   const [seriesIdx, setSeriesIdx] = useState(0);
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
