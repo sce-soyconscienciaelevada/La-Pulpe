@@ -40,9 +40,13 @@ export type ComparisonSummary = {
 // so a Friday isn't judged against a quiet Thursday.
 export async function getSameWeekdayLastWeek(
   venueId: string,
-  today: Date
+  today: Date,
+  since?: Date | null
 ): Promise<ComparisonSummary | null> {
   const lastWeekDate = addDays(today, -7);
+  // Never compare against a day that predates real use — it would read as a
+  // collapse in sales when it is really just an empty pre-launch row.
+  if (since && lastWeekDate < since) return null;
   const businessDay = await prisma.businessDay.findUnique({
     where: { venueId_date: { venueId, date: lastWeekDate } },
   });
@@ -66,8 +70,9 @@ export async function getSameWeekdayLastWeek(
 // Rolling 30-day average of consumptions/day, excluding today (today is still
 // filling up), and only counting days the bar actually had activity — a
 // closed Monday shouldn't drag the average down.
-export async function getMonthlyAvgConsumptionCount(venueId: string, today: Date) {
-  const from = addDays(today, -30);
+export async function getMonthlyAvgConsumptionCount(venueId: string, today: Date, since?: Date | null) {
+  const window = addDays(today, -30);
+  const from = since && since > window ? since : window;
   const to = addDays(today, -1);
   const rows = await prisma.consumption.findMany({
     where: { venueId, businessDay: { date: { gte: from, lte: to } } },
@@ -85,8 +90,15 @@ export async function getMonthlyAvgConsumptionCount(venueId: string, today: Date
 
 // Both chart periods ("14 d" and "Mes") come from one fetch spanning 60 days —
 // enough to cover 30 current + 30 previous, the widest of the two.
-export async function getRevenueSeries(venueId: string, today: Date): Promise<ChartSeries[]> {
-  const from = addDays(today, -59);
+// `since` is Venue.realDataStartedAt: days before the owner pressed "empezar"
+// are excluded, so pre-launch test rows never show up as real trade.
+export async function getRevenueSeries(
+  venueId: string,
+  today: Date,
+  since?: Date | null
+): Promise<ChartSeries[]> {
+  const window = addDays(today, -59);
+  const from = since && since > window ? since : window;
   const rows = await prisma.consumption.findMany({
     where: { venueId, type: "SALE", businessDay: { date: { gte: from, lte: today } } },
     select: { quantity: true, unitPriceCharged: true, businessDay: { select: { date: true } } },

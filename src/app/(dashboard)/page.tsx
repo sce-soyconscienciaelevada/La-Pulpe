@@ -22,6 +22,8 @@ import {
 import { ChartCard } from "@/components/ChartCard";
 import { SegmentedBar } from "@/components/SegmentedBar";
 import { Donut } from "@/components/Donut";
+import { DemoBanner } from "@/components/DemoBanner";
+import { demoRevenueSeries, DEMO_KPIS, DEMO_MIX, DEMO_CATEGORIES } from "@/lib/demo-data";
 import Link from "next/link";
 
 function localHour(date: Date, timeZone: string) {
@@ -89,10 +91,16 @@ export default async function InicioPage() {
   const summary = await getDaySummary(day.id);
   const now = new Date();
 
-  const [comparison, avgTragos, chartSeries, categorySales] = await Promise.all([
-    getSameWeekdayLastWeek(venue.id, day.date),
-    getMonthlyAvgConsumptionCount(venue.id, day.date),
-    getRevenueSeries(venue.id, day.date),
+  // Null until the owner presses "empezar" in the demo banner. While null the
+  // dashboard shows sample figures so the layout can be judged before there is
+  // any trade to show; once set it is day one and only real data is counted.
+  const since = venue.realDataStartedAt;
+  const isDemo = since === null;
+
+  const [comparison, avgTragos, realChartSeries, realCategorySales] = await Promise.all([
+    getSameWeekdayLastWeek(venue.id, day.date, since),
+    getMonthlyAvgConsumptionCount(venue.id, day.date, since),
+    getRevenueSeries(venue.id, day.date, since),
     getCategorySalesToday(venue.id, day.id),
   ]);
 
@@ -122,27 +130,55 @@ export default async function InicioPage() {
     where: { venueId: venue.id, isSellable: true, salePricePerServing: null },
   });
 
-  const ownerCompCostToday =
+  const realOwnerCompCost =
     summary.byType.OWNER.reduce((s, c) => s + c.quantity * c.unitCost, 0) +
     summary.byType.COMP.reduce((s, c) => s + c.quantity * c.unitCost, 0);
-  const ownerCompCountToday = summary.byType.OWNER.length + summary.byType.COMP.length;
-  const marginPercent = summary.revenue > 0 ? (summary.profit / summary.revenue) * 100 : 0;
 
-  const revenuePct = comparison ? pctDelta(summary.revenue, comparison.revenue) : null;
-  const revenueAbs = comparison ? formatARS(summary.revenue - comparison.revenue) : undefined;
-  const ownerCompPct = comparison ? pctDelta(ownerCompCostToday, comparison.ownerCompCost) : null;
-  const tragosCount = summary.consumptions.length;
-  const tragosPct = avgTragos > 0 ? pctDelta(tragosCount, avgTragos) : null;
-  const tragosAbs =
-    avgTragos > 0 ? `(${tragosCount - Math.round(avgTragos) >= 0 ? "+" : ""}${tragosCount - Math.round(avgTragos)})` : undefined;
+  // Every figure below resolves to the sample set while isDemo is true, so the
+  // dashboard is never half real and half invented.
+  const revenue = isDemo ? DEMO_KPIS.revenue : summary.revenue;
+  const profit = isDemo ? DEMO_KPIS.profit : summary.profit;
+  const ownerCompCostToday = isDemo ? DEMO_KPIS.ownerCompCost : realOwnerCompCost;
+  const ownerCompCountToday = isDemo
+    ? DEMO_KPIS.ownerCompCount
+    : summary.byType.OWNER.length + summary.byType.COMP.length;
+  const tragosCount = isDemo ? DEMO_KPIS.tragos : summary.consumptions.length;
+  const marginPercent = revenue > 0 ? (profit / revenue) * 100 : 0;
 
-  const mixItems = [
-    { key: "SALE", label: "Venta", value: summary.byType.SALE.length, color: "var(--profit)" },
-    { key: "OWNER", label: "Dueños", value: summary.byType.OWNER.length, color: "var(--comp)" },
-    { key: "COMP", label: "Cortesía", value: summary.byType.COMP.length, color: "var(--accent)" },
-    { key: "BAND_ALLOWANCE", label: "Banda", value: summary.byType.BAND_ALLOWANCE.length, color: "var(--text-faint)" },
-  ];
+  const revenuePct = isDemo
+    ? DEMO_KPIS.revenueDeltaPct
+    : comparison
+      ? pctDelta(summary.revenue, comparison.revenue)
+      : null;
+  const revenueAbs = isDemo
+    ? formatARS(DEMO_KPIS.revenueDeltaAbs)
+    : comparison
+      ? formatARS(summary.revenue - comparison.revenue)
+      : undefined;
+  const ownerCompPct = isDemo
+    ? DEMO_KPIS.ownerCompDeltaPct
+    : comparison
+      ? pctDelta(ownerCompCostToday, comparison.ownerCompCost)
+      : null;
+  const tragosPct = isDemo ? DEMO_KPIS.tragosDeltaPct : avgTragos > 0 ? pctDelta(tragosCount, avgTragos) : null;
+  const tragosAbs = isDemo
+    ? `(${DEMO_KPIS.tragosDeltaAbs})`
+    : avgTragos > 0
+      ? `(${tragosCount - Math.round(avgTragos) >= 0 ? "+" : ""}${tragosCount - Math.round(avgTragos)})`
+      : undefined;
+
+  const chartSeries = isDemo ? demoRevenueSeries(day.date) : realChartSeries;
+  const categorySales = isDemo ? DEMO_CATEGORIES : realCategorySales;
+  const mixItems = isDemo
+    ? DEMO_MIX
+    : [
+        { key: "SALE", label: "Venta", value: summary.byType.SALE.length, color: "var(--profit)" },
+        { key: "OWNER", label: "Dueños", value: summary.byType.OWNER.length, color: "var(--comp)" },
+        { key: "COMP", label: "Cortesía", value: summary.byType.COMP.length, color: "var(--accent)" },
+        { key: "BAND_ALLOWANCE", label: "Banda", value: summary.byType.BAND_ALLOWANCE.length, color: "var(--text-faint)" },
+      ];
   const categoryTotal = categorySales.reduce((s, c) => s + c.value, 0);
+  const mixTotal = mixItems.reduce((s, m) => s + m.value, 0);
 
   const pendingParts: string[] = [];
   if (lowStockFiltered.length > 0) {
@@ -173,13 +209,17 @@ export default async function InicioPage() {
         }
       />
 
+      {isDemo && <DemoBanner />}
+
       <div className="mb-4">
         <KpiBox>
           <Kpi
             label="Ventas del día"
-            value={formatARS(summary.revenue)}
+            value={formatARS(revenue)}
             delta={
-              comparison ? (
+              isDemo ? (
+                <Delta pct={revenuePct} absLabel={`(${revenueAbs})`} contextLabel="vs. mismo día la semana pasada" />
+              ) : comparison ? (
                 <Delta pct={revenuePct} absLabel={`(${revenueAbs})`} contextLabel={`vs. ${comparison.weekdayLabel} pasado`} />
               ) : (
                 <span>Sin dato de {weekdayName(day.date)} para comparar</span>
@@ -188,8 +228,8 @@ export default async function InicioPage() {
           />
           <Kpi
             label="Ganancia del día"
-            value={formatARS(summary.profit)}
-            tone={summary.profit >= 0 ? "profit" : "loss"}
+            value={formatARS(profit)}
+            tone={profit >= 0 ? "profit" : "loss"}
             delta={
               <span className={marginPercent >= 0 ? "text-profit" : "text-loss"}>
                 {marginPercent.toFixed(1).replace(".", ",")}% margen sobre ventas
@@ -204,7 +244,9 @@ export default async function InicioPage() {
               <Delta
                 pct={ownerCompPct}
                 absLabel={`(${ownerCompCountToday} consumiciones)`}
-                contextLabel={comparison ? `vs. ${comparison.weekdayLabel} pasado` : "sin cargo"}
+                contextLabel={
+                  isDemo ? "sin cargo" : comparison ? `vs. ${comparison.weekdayLabel} pasado` : "sin cargo"
+                }
               />
             }
           />
@@ -218,7 +260,7 @@ export default async function InicioPage() {
 
       <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)] gap-4 mb-4">
         <ChartCard
-          headlineLabel="Ventas del período"
+          headlineLabel={isDemo ? "Ventas del período (ejemplo)" : "Ventas del período"}
           series={chartSeries}
           format="currency"
           previousLegend="Período anterior"
@@ -227,12 +269,15 @@ export default async function InicioPage() {
 
         <div className="flex flex-col gap-4">
           <Card>
-            <SectionHead title="Mezcla de consumo" hint={`${summary.consumptions.length} hoy`} />
+            <SectionHead
+              title="Mezcla de consumo"
+              hint={isDemo ? `${mixTotal} (ejemplo)` : `${summary.consumptions.length} hoy`}
+            />
             <SegmentedBar items={mixItems} formatValue={(n) => String(n)} />
           </Card>
 
           <Card>
-            <SectionHead title="Ventas por categoría" />
+            <SectionHead title="Ventas por categoría" hint={isDemo ? "ejemplo" : undefined} />
             <Donut items={categorySales} total={categoryTotal} formatValue={formatARS} />
           </Card>
         </div>
@@ -301,7 +346,9 @@ export default async function InicioPage() {
               {recent.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-3 py-4 text-sm text-text-muted">
-                    Todavía no hay consumiciones registradas hoy.
+                    Todavía no hay consumiciones registradas hoy. Esta tabla siempre muestra
+                    movimientos reales, nunca ejemplos, así que se va a ir llenando sola a medida
+                    que cargues consumiciones en el Registro diario.
                   </td>
                 </tr>
               ) : (
