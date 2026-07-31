@@ -1,9 +1,20 @@
 // Bump this string on every deploy that should trigger the "actualización
 // disponible" banner + "what's new" popup. Add a matching CHANGELOG entry --
 // that's what the popup shows. See TECHNICAL-GUIDE.md's deploy checklist.
-export const APP_VERSION = "2026-07-31.2";
+export const APP_VERSION = "2026-07-31.3";
 
 export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
+  "2026-07-31.3": {
+    title: "Botones clickeables + nombres prolijos + iconos nuevos",
+    items: [
+      "Los botones de toda la app ahora se ven clickeables (antes se veían iguales estén activos o no)",
+      "Heladeras: el botón \"Semana siguiente\" avisa mientras carga la semana",
+      "Nombres de productos, personas y proveedores se corrigen solos — primera letra en mayúscula y acentos en las palabras más comunes, aunque los cargues todo en minúscula",
+      "Productos: nuevo botón para volver al listado sin usar el menú",
+      "Feedback: los reportes resueltos piden una nota (\"¿qué se hizo?\") y pasan a un log separado — la lista activa queda corta",
+      "Los emojis de bebidas se reemplazaron por íconos de vaso simples, según la categoría del producto",
+    ],
+  },
   "2026-07-31.2": {
     title: "Inicio: números de ejemplo hasta que arranques a cargar de verdad",
     items: [

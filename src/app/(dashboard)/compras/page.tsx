@@ -7,6 +7,7 @@ export default async function ComprasPage() {
   const products = await prisma.product.findMany({
     where: { venueId: venue.id },
     orderBy: { name: "asc" },
+    include: { category: true },
   });
   const suppliers = await prisma.supplier.findMany({ where: { venueId: venue.id } });
   const reorderItems = await prisma.reorderItem.findMany({
@@ -21,7 +22,7 @@ export default async function ComprasPage() {
         products={products.map((p) => ({
           id: p.id,
           name: p.name,
-          emoji: p.emoji,
+          categoryName: p.category?.name ?? null,
           costPricePerContainer: p.costPricePerContainer,
         }))}
         suppliers={suppliers.map((s) => ({ id: s.id, name: s.name }))}

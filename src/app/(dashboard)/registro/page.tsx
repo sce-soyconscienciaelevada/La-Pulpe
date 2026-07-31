@@ -11,6 +11,7 @@ export default async function RegistroPage() {
   const quickProducts = await prisma.product.findMany({
     where: { venueId: venue.id, showOnQuickGrid: true },
     orderBy: { quickGridSort: "asc" },
+    include: { category: true },
   });
   const owners = await prisma.person.findMany({
     where: { venueId: venue.id, kind: "OWNER", isActive: true },
@@ -29,7 +30,7 @@ export default async function RegistroPage() {
         quickProducts={quickProducts.map((p) => ({
           id: p.id,
           name: p.name,
-          emoji: p.emoji,
+          categoryName: p.category?.name ?? null,
           colorHex: p.colorHex,
         }))}
         owners={owners.map((o) => ({ id: o.id, name: o.name }))}

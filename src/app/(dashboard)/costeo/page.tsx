@@ -9,7 +9,7 @@ export default async function CosteoPage() {
   const recipes = await prisma.recipe.findMany({
     where: { product: { venueId: venue.id } },
     include: {
-      product: true,
+      product: { include: { category: true } },
       ingredients: { include: { ingredientProduct: true } },
     },
   });
@@ -29,7 +29,7 @@ export default async function CosteoPage() {
   const existingRecipes = recipes.map((r) => ({
     productId: r.productId,
     productName: r.product.name,
-    productEmoji: r.product.emoji,
+    productCategoryName: r.product.category?.name ?? null,
     yieldServings: r.yieldServings,
     costPerServing: computeRecipeCost(r.ingredients, r.yieldServings),
     salePricePerServing: r.product.salePricePerServing,
@@ -47,8 +47,8 @@ export default async function CosteoPage() {
         subtitle="El costo se calcula en vivo a partir de las medidas — nunca queda desactualizado"
       />
       <RecipeEditor
-        candidateProducts={candidateProducts.map((p) => ({ id: p.id, name: p.name, emoji: p.emoji }))}
-        ingredientOptions={ingredientOptions.map((p) => ({ id: p.id, name: p.name, emoji: p.emoji }))}
+        candidateProducts={candidateProducts.map((p) => ({ id: p.id, name: p.name }))}
+        ingredientOptions={ingredientOptions.map((p) => ({ id: p.id, name: p.name }))}
         existingRecipes={existingRecipes}
       />
     </div>

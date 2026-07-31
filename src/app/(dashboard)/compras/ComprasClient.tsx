@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { logPurchase, updateReorderStatus } from "./actions";
 import { Card, Badge } from "@/components/ui";
 
-type Product = { id: string; name: string; emoji: string | null; costPricePerContainer: number };
+type Product = { id: string; name: string; categoryName: string | null; costPricePerContainer: number };
 type Supplier = { id: string; name: string };
 type ReorderRow = {
   id: string;
@@ -51,7 +51,7 @@ export function ComprasClient({
             <option value="">Producto...</option>
             {products.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.emoji} {p.name}
+                {p.name}
               </option>
             ))}
           </select>

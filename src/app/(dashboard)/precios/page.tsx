@@ -8,6 +8,7 @@ export default async function PreciosPage() {
   const products = await prisma.product.findMany({
     where: { venueId: venue.id, isSellable: true },
     orderBy: { name: "asc" },
+    include: { category: true },
   });
 
   const rows = products.map((p) => {
@@ -19,7 +20,7 @@ export default async function PreciosPage() {
     return {
       id: p.id,
       name: p.name,
-      emoji: p.emoji,
+      categoryName: p.category?.name ?? null,
       costPricePerContainer: p.costPricePerContainer,
       costPerServing: pricing.costPerServing,
       salePricePerServing: p.salePricePerServing,

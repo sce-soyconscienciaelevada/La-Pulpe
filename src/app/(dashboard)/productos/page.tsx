@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Table, Badge } from "@/components/ui";
+import { ProductIcon } from "@/components/ProductIcon";
 
 export default async function ProductosPage() {
   const venue = await prisma.venue.findFirstOrThrow();
@@ -33,8 +34,9 @@ export default async function ProductosPage() {
           {products.map((p) => (
             <tr key={p.id} className="border-b border-border">
               <td className="px-3 py-2">
-                <Link href={`/productos/${p.id}`} className="text-text hover:text-accent">
-                  {p.emoji} {p.name}
+                <Link href={`/productos/${p.id}`} className="text-text hover:text-accent inline-flex items-center gap-2">
+                  <ProductIcon categoryName={p.category.name} className="inline-block w-4 h-4 shrink-0 text-text-muted" />
+                  {p.name}
                 </Link>
               </td>
               <td className="px-3 py-2 text-text-muted">{p.category.name}</td>

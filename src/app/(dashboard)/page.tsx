@@ -23,6 +23,7 @@ import { ChartCard } from "@/components/ChartCard";
 import { SegmentedBar } from "@/components/SegmentedBar";
 import { Donut } from "@/components/Donut";
 import { DemoBanner } from "@/components/DemoBanner";
+import { ProductIcon } from "@/components/ProductIcon";
 import { demoRevenueSeries, DEMO_KPIS, DEMO_MIX, DEMO_CATEGORIES } from "@/lib/demo-data";
 import Link from "next/link";
 
@@ -106,6 +107,7 @@ export default async function InicioPage() {
 
   const lowStock = await prisma.product.findMany({
     where: { venueId: venue.id, reorderThreshold: { not: null } },
+    include: { category: true },
   });
   const lowStockFiltered = lowStock.filter(
     (p) => p.reorderThreshold !== null && p.currentStock <= p.reorderThreshold
@@ -113,6 +115,7 @@ export default async function InicioPage() {
 
   const sellableProducts = await prisma.product.findMany({
     where: { venueId: venue.id, isSellable: true, salePricePerServing: { not: null } },
+    include: { category: true },
   });
   const topByMargin = sellableProducts
     .map((p) => ({
@@ -297,8 +300,11 @@ export default async function InicioPage() {
           ) : (
             <ul className="space-y-2">
               {topByMargin.map((p) => (
-                <li key={p.id} className="flex items-center justify-between text-sm">
-                  <span className="text-text">{p.emoji} {p.name}</span>
+                <li key={p.id} className="flex items-center gap-2 justify-between text-sm">
+                  <span className="flex items-center gap-2 text-text min-w-0">
+                    <ProductIcon categoryName={p.category?.name} className="inline-block w-4 h-4 shrink-0 text-text-muted" />
+                    <span className="truncate">{p.name}</span>
+                  </span>
                   <Badge tone="profit">{p.pricing.marginPercent?.toFixed(0)}% margen</Badge>
                 </li>
               ))}
@@ -316,8 +322,11 @@ export default async function InicioPage() {
           ) : (
             <ul className="space-y-2">
               {lowStockFiltered.map((p) => (
-                <li key={p.id} className="flex items-center justify-between text-sm">
-                  <span className="text-text">{p.emoji} {p.name}</span>
+                <li key={p.id} className="flex items-center gap-2 justify-between text-sm">
+                  <span className="flex items-center gap-2 text-text min-w-0">
+                    <ProductIcon categoryName={p.category?.name} className="inline-block w-4 h-4 shrink-0 text-text-muted" />
+                    <span className="truncate">{p.name}</span>
+                  </span>
                   <Badge tone="loss">{p.currentStock.toFixed(1)} / mín. {p.reorderThreshold}</Badge>
                 </li>
               ))}
@@ -361,7 +370,12 @@ export default async function InicioPage() {
                       <td className="px-3 py-2 font-mono text-text-faint tabular-nums">
                         {c.createdAt.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", timeZone: venue.timezone })}
                       </td>
-                      <td className="px-3 py-2 text-text">{c.product?.emoji} {c.product?.name ?? c.freeText ?? "—"}</td>
+                      <td className="px-3 py-2 text-text">
+                        <span className="flex items-center gap-2">
+                          <ProductIcon categoryName={c.product?.category?.name} className="inline-block w-4 h-4 shrink-0 text-text-muted" />
+                          {c.product?.name ?? c.freeText ?? "—"}
+                        </span>
+                      </td>
                       <td className="px-3 py-2">
                         <Badge tone={TYPE_TONE[c.type]}>{TYPE_LABEL[c.type]}</Badge>
                       </td>

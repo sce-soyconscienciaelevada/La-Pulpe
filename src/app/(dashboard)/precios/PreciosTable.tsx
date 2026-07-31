@@ -3,11 +3,12 @@
 import { useState, useTransition, useMemo } from "react";
 import { updateSalePrice, updateCostPrice } from "./actions";
 import { Table, Badge, formatARS } from "@/components/ui";
+import { ProductIcon } from "@/components/ProductIcon";
 
 type Row = {
   id: string;
   name: string;
-  emoji: string | null;
+  categoryName: string | null;
   costPricePerContainer: number;
   costPerServing: number;
   salePricePerServing: number | null;
@@ -46,7 +47,10 @@ export function PreciosTable({ rows }: { rows: Row[] }) {
         {sorted.map((r) => (
           <tr key={r.id} className="border-b border-border">
             <td className="px-3 py-2 text-text whitespace-nowrap">
-              {r.emoji} {r.name}
+              <span className="inline-flex items-center gap-2">
+                <ProductIcon categoryName={r.categoryName} className="inline-block w-4 h-4 shrink-0 text-text-muted" />
+                {r.name}
+              </span>
             </td>
             <td className="px-3 py-2">
               <input

@@ -17,7 +17,6 @@ export default async function InventarioPage() {
   const rows = products.map((p) => ({
     id: p.id,
     name: p.name,
-    emoji: p.emoji,
     containerLabel: p.containerLabel,
     currentStock: p.currentStock,
     reorderThreshold: p.reorderThreshold,

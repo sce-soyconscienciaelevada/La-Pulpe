@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/ui";
+import { ProductIcon } from "@/components/ProductIcon";
 import { FichaTecnicaForm } from "./FichaTecnicaForm";
 
 export default async function FichaTecnicaPage({ params }: { params: Promise<{ productId: string }> }) {
@@ -9,14 +10,14 @@ export default async function FichaTecnicaPage({ params }: { params: Promise<{ p
     where: { productId },
     include: {
       product: true,
-      ingredients: { include: { ingredientProduct: true } },
+      ingredients: { include: { ingredientProduct: { include: { category: true } } } },
     },
   });
   if (!recipe) notFound();
 
   return (
     <div>
-      <PageHeader title={`${recipe.product.emoji ?? ""} ${recipe.product.name}`} subtitle="Ficha técnica" />
+      <PageHeader title={recipe.product.name} subtitle="Ficha técnica" />
 
       <div className="grid lg:grid-cols-2 gap-4">
         <FichaTecnicaForm
@@ -35,8 +36,13 @@ export default async function FichaTecnicaPage({ params }: { params: Promise<{ p
             <h3 className="font-semibold text-text mb-3">Ingredientes</h3>
             <ul className="text-sm text-text space-y-1">
               {recipe.ingredients.map((i) => (
-                <li key={i.id}>
-                  {i.quantity} medida(s) de {i.ingredientProduct.emoji} {i.ingredientProduct.name}
+                <li key={i.id} className="flex items-center gap-1.5">
+                  <span>{i.quantity} medida(s) de</span>
+                  <ProductIcon
+                    categoryName={i.ingredientProduct.category?.name}
+                    className="inline-block w-4 h-4 shrink-0 text-text-muted"
+                  />
+                  <span>{i.ingredientProduct.name}</span>
                 </li>
               ))}
             </ul>

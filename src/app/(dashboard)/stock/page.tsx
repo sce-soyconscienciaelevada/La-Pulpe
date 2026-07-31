@@ -6,7 +6,9 @@ export default async function StockPage() {
   const venue = await prisma.venue.findFirstOrThrow();
   const period = await prisma.stockPeriod.findFirst({
     where: { venueId: venue.id, status: "OPEN" },
-    include: { counts: { include: { product: true }, orderBy: { product: { name: "asc" } } } },
+    include: {
+      counts: { include: { product: { include: { category: true } } }, orderBy: { product: { name: "asc" } } },
+    },
     orderBy: { startDate: "desc" },
   });
 
@@ -34,7 +36,7 @@ export default async function StockPage() {
         rows={period.counts.map((c) => ({
           productId: c.productId,
           productName: c.product.name,
-          emoji: c.product.emoji,
+          categoryName: c.product.category?.name ?? null,
           initialQuantity: c.initialQuantity,
           countedFinalQuantity: c.countedFinalQuantity,
           variance: c.variance,

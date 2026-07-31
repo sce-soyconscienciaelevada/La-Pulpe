@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/ui";
+import { ProductIcon } from "@/components/ProductIcon";
 
 export default async function RecetarioPage() {
   const venue = await prisma.venue.findFirstOrThrow();
   const recipes = await prisma.recipe.findMany({
     where: { product: { venueId: venue.id } },
-    include: { product: true },
+    include: { product: { include: { category: true } } },
     orderBy: { product: { name: "asc" } },
   });
 
@@ -38,7 +39,10 @@ export default async function RecetarioPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={r.photoUrl} alt={r.product.name} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-4xl">{r.product.emoji ?? "🍸"}</span>
+                    <ProductIcon
+                      categoryName={r.product.category?.name}
+                      className="inline-block w-10 h-10 text-text-muted"
+                    />
                   )}
                 </div>
                 <h3 className="font-medium text-text">{r.product.name}</h3>

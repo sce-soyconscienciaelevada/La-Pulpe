@@ -10,11 +10,12 @@ import {
   clearDayAction,
 } from "./actions";
 import { Card, Badge, formatARS } from "@/components/ui";
+import { ProductIcon } from "@/components/ProductIcon";
 
 type QuickProduct = {
   id: string;
   name: string;
-  emoji: string | null;
+  categoryName: string | null;
   colorHex: string | null;
 };
 
@@ -242,7 +243,7 @@ function QuickGridTab({
             className="bg-bg-card border-t-2 rounded-xl px-3 py-4 text-center hover:bg-bg-elevated active:scale-95 transition"
             style={{ borderTopColor: p.colorHex ?? "#c89b3c" }}
           >
-            <div className="text-2xl mb-1">{p.emoji}</div>
+            <ProductIcon categoryName={p.categoryName} className="inline-block w-7 h-7 mb-1 text-text-muted" />
             <div className="text-xs text-text mb-1 truncate">{p.name}</div>
             <div className="text-lg font-bold text-text">{countFor(p.name)}</div>
           </button>

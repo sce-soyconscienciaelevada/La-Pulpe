@@ -4,11 +4,11 @@ import { useState, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { quickAddStock, quickRemoveStock, createProductQuick, deleteProductFromInventario } from "./actions";
 import { Card, Badge } from "@/components/ui";
+import { ProductIcon } from "@/components/ProductIcon";
 
 type ProductRow = {
   id: string;
   name: string;
-  emoji: string | null;
   containerLabel: string | null;
   currentStock: number;
   reorderThreshold: number | null;
@@ -139,8 +139,9 @@ export function InventarioList({
                     className="flex items-center justify-between gap-3 py-2.5 border-b border-border"
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm text-text truncate">
-                        {p.emoji} {p.name}
+                      <div className="text-sm text-text truncate flex items-center gap-2">
+                        <ProductIcon categoryName={p.categoryName} className="inline-block w-4 h-4 shrink-0 text-text-muted" />
+                        <span className="truncate">{p.name}</span>
                       </div>
                       <div className="text-xs text-text-muted">{p.containerLabel ?? "—"}</div>
                     </div>

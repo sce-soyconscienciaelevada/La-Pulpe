@@ -3,12 +3,13 @@
 import { useState, useTransition } from "react";
 import { saveRecipe, deleteRecipe } from "./actions";
 import { Card, formatARS } from "@/components/ui";
+import { ProductIcon } from "@/components/ProductIcon";
 
-type IngredientOption = { id: string; name: string; emoji: string | null };
+type IngredientOption = { id: string; name: string };
 type ExistingRecipe = {
   productId: string;
   productName: string;
-  productEmoji: string | null;
+  productCategoryName: string | null;
   yieldServings: number;
   costPerServing: number;
   salePricePerServing: number | null;
@@ -20,7 +21,7 @@ export function RecipeEditor({
   ingredientOptions,
   existingRecipes,
 }: {
-  candidateProducts: { id: string; name: string; emoji: string | null }[];
+  candidateProducts: { id: string; name: string }[];
   ingredientOptions: IngredientOption[];
   existingRecipes: ExistingRecipe[];
 }) {
@@ -30,8 +31,9 @@ export function RecipeEditor({
         {existingRecipes.map((r) => (
           <Card key={r.productId}>
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-medium text-text">
-                {r.productEmoji} {r.productName}
+              <h3 className="font-medium text-text flex items-center gap-2">
+                <ProductIcon categoryName={r.productCategoryName} className="inline-block w-4 h-4 shrink-0 text-text-muted" />
+                {r.productName}
               </h3>
               <button
                 onClick={() => deleteRecipe(r.productId)}
@@ -71,7 +73,7 @@ function NewRecipeForm({
   candidateProducts,
   ingredientOptions,
 }: {
-  candidateProducts: { id: string; name: string; emoji: string | null }[];
+  candidateProducts: { id: string; name: string }[];
   ingredientOptions: IngredientOption[];
 }) {
   const [productId, setProductId] = useState("");
@@ -102,7 +104,7 @@ function NewRecipeForm({
         <option value="">Producto...</option>
         {candidateProducts.map((p) => (
           <option key={p.id} value={p.id}>
-            {p.emoji} {p.name}
+            {p.name}
           </option>
         ))}
       </select>
@@ -122,7 +124,7 @@ function NewRecipeForm({
               <option value="">Ingrediente...</option>
               {ingredientOptions.map((i) => (
                 <option key={i.id} value={i.id}>
-                  {i.emoji} {i.name}
+                  {i.name}
                 </option>
               ))}
             </select>

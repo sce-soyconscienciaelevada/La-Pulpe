@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, formatARS } from "@/components/ui";
+import { ProductIcon } from "@/components/ProductIcon";
 
 export default async function EstadisticasPage() {
   const venue = await prisma.venue.findFirstOrThrow();
@@ -8,14 +9,18 @@ export default async function EstadisticasPage() {
 
   const consumptions = await prisma.consumption.findMany({
     where: { venueId: venue.id, createdAt: { gte: since } },
-    include: { product: true, businessDay: true },
+    include: { product: { include: { category: true } }, businessDay: true },
   });
 
-  const salesByProduct = new Map<string, { name: string; emoji: string | null; qty: number; revenue: number }>();
+  const salesByProduct = new Map<
+    string,
+    { name: string; categoryName: string | null; qty: number; revenue: number }
+  >();
   for (const c of consumptions.filter((c) => c.type === "SALE")) {
     const key = c.productId ?? c.freeText ?? "otro";
     const name = c.product?.name ?? c.freeText ?? "Otro";
-    const existing = salesByProduct.get(key) ?? { name, emoji: c.product?.emoji ?? null, qty: 0, revenue: 0 };
+    const existing =
+      salesByProduct.get(key) ?? { name, categoryName: c.product?.category?.name ?? null, qty: 0, revenue: 0 };
     existing.qty += c.quantity;
     existing.revenue += c.quantity * c.unitPriceCharged;
     salesByProduct.set(key, existing);
@@ -57,7 +62,10 @@ export default async function EstadisticasPage() {
               {topSellers.map((s) => (
                 <div key={s.name}>
                   <div className="flex justify-between text-sm text-text mb-0.5">
-                    <span>{s.emoji} {s.name}</span>
+                    <span className="flex items-center gap-1.5 min-w-0">
+                      <ProductIcon categoryName={s.categoryName} className="inline-block w-4 h-4 shrink-0 text-text-muted" />
+                      <span className="truncate">{s.name}</span>
+                    </span>
                     <span>{s.qty}</span>
                   </div>
                   <div className="h-1.5 bg-border rounded-full overflow-hidden">

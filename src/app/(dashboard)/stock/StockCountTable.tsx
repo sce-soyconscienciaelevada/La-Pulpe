@@ -3,11 +3,12 @@
 import { useState, useTransition } from "react";
 import { saveCount, closePeriodAction } from "./actions";
 import { Table, Badge } from "@/components/ui";
+import { ProductIcon } from "@/components/ProductIcon";
 
 type Row = {
   productId: string;
   productName: string;
-  emoji: string | null;
+  categoryName: string | null;
   initialQuantity: number;
   countedFinalQuantity: number | null;
   variance: number | null;
@@ -42,7 +43,10 @@ export function StockCountTable({
           {rows.map((r) => (
             <tr key={r.productId} className="border-b border-border">
               <td className="px-3 py-2 text-text whitespace-nowrap">
-                {r.emoji} {r.productName}
+                <span className="inline-flex items-center gap-2">
+                  <ProductIcon categoryName={r.categoryName} className="inline-block w-4 h-4 shrink-0 text-text-muted" />
+                  {r.productName}
+                </span>
               </td>
               <td className="px-3 py-2 text-text-muted">{r.initialQuantity.toFixed(1)}</td>
               <td className="px-3 py-2">

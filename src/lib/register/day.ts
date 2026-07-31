@@ -20,7 +20,7 @@ export async function getOrCreateBusinessDay(venueId: string, date: Date = today
 export async function getDaySummary(businessDayId: string) {
   const consumptions = await prisma.consumption.findMany({
     where: { businessDayId },
-    include: { product: true, person: true },
+    include: { product: { include: { category: true } }, person: true },
     orderBy: { createdAt: "asc" },
   });
 
