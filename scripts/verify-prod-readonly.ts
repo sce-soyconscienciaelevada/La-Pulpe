@@ -1,4 +1,6 @@
 import { chromium } from "playwright";
+import { join } from "node:path";
+import { staticRoutes } from "./routes";
 
 const BASE = "https://la-pulpe-three.vercel.app";
 // Never hardcode the real admin password here -- this repo is public.
@@ -25,13 +27,17 @@ async function main() {
   await page.waitForURL(`${BASE}/`, { timeout: 15000 });
   console.log("Login OK, landed on:", page.url());
 
-  const routes = [
-    "/", "/inventario", "/registro", "/stock", "/cristaleria", "/compras", "/productos",
-    "/costeo", "/precios", "/proveedores", "/reportes", "/estadisticas", "/feedback", "/ajustes",
-  ];
+  // Derived from the filesystem, not hardcoded: the old hardcoded list here
+  // went stale at 14 routes while the app grew to 23, so heladeras,
+  // inventario-barra, ventas-pos and recetario were checked by nothing.
+  const routes = staticRoutes(join(process.cwd(), "src", "app")).filter((r) => r !== "/login");
+  const failures: string[] = [];
   for (const r of routes) {
     const res = await page.goto(`${BASE}${r}`, { waitUntil: "networkidle" });
-    console.log(r, "->", res?.status());
+    const status = res?.status() ?? 0;
+    const ok = status === 200;
+    if (!ok) failures.push(`${r} -> ${status}`);
+    console.log(ok ? "PASS" : "FAIL", r, "->", status);
   }
 
   await page.goto(`${BASE}/stock`, { waitUntil: "networkidle" });
@@ -45,6 +51,14 @@ async function main() {
   console.log("Console/page errors:", errors.length === 0 ? "none" : errors);
 
   await browser.close();
+
+  // Previously this script only printed statuses and always exited 0, so a
+  // failing route scrolled past unnoticed. It now fails loudly.
+  if (failures.length > 0) {
+    console.error(`\n${failures.length} route(s) did not return 200:\n  ${failures.join("\n  ")}`);
+    process.exit(1);
+  }
+  console.log(`\nAll ${routes.length} routes returned 200.`);
 }
 
 main().catch((e) => {

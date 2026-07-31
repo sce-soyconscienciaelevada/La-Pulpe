@@ -9,6 +9,7 @@
     "lint": "eslint",
     "postinstall": "prisma generate",
     "seed": "tsx prisma/seed.ts",
+    "smoke": "tsx scripts/smoke.ts",
     "db:reset": "prisma migrate reset --force"
   },
   "dependencies": {

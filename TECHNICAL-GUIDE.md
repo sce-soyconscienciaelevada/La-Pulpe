@@ -108,6 +108,25 @@ Two separate scripts, deliberately not interchangeable:
 
 **Required step before every deploy that should notify users**: bump `APP_VERSION` in `src/lib/version.ts` and add a `CHANGELOG[APP_VERSION]` entry (title + bullet list). Skipping this means the deploy ships silently — no banner, no changelog — which is sometimes fine (invisible bugfixes) but should be a deliberate choice, not an oversight.
 
+## 8c. Deploy checklist (run in this order)
+
+```bash
+npx tsc --noEmit                                    # types
+npm run build                                       # build
+grep -rl '"use client"' src | xargs grep -l "lib/prisma"   # must print nothing
+BARMGMT_DB_CONN=... npx next dev -p 4002 &          # then, in another shell:
+BARMGMT_DB_CONN=... npm run smoke                   # renders EVERY route, asserts 200
+# bump APP_VERSION + CHANGELOG (see 8b), then:
+npx vercel --prod
+curl -s https://la-pulpe-three.vercel.app/api/version
+```
+
+**`npm run smoke` is not optional, and it is not the same check as `npm run build`.** On 2026-07-30 the Inicio page shipped a 500 through a green `tsc`, a green `next build`, *and* a script that exercised every one of its Prisma queries. The defect was a function prop (`formatValue={formatARS}`) passed from a Server Component to a Client Component — not serializable across the RSC boundary, and it only throws when a request actually renders the page. On a dynamic (`ƒ`) route, nothing at build time can see it. Joan found it by opening the page.
+
+`scripts/smoke.ts` mints its own Auth.js JWT session cookie from the local dev secret, so it needs no password and writes nothing, and it discovers routes from the filesystem so it cannot go stale. It was verified to fail (`FAIL / 500`, exit 1) when the original defect is reintroduced.
+
+Related, post-deploy: `scripts/verify-prod-readonly.ts` runs the same route sweep against live production with a real login (needs `BARMGMT_TEST_PASSWORD`). Both scripts now share route discovery via `scripts/routes.ts` — its route list used to be hardcoded and had gone stale at 14 routes while the app grew to 23, and it only *printed* statuses without ever failing, so a 500 would have scrolled by unnoticed. Both flaws are fixed.
+
 ## 9. Known limitations (decisions, not bugs)
 
 - Quick-grid mappings for Cerveza/Vino/Whisky/Champagne/S·Alcohol picked a default SKU (Miller 330, Santa Julia Malbec, Johnny Red, Chandon Extra Brut, Agua Sin Gas) — needs Pablo's confirmation, not final.
@@ -131,4 +150,4 @@ The live admin password was briefly hardcoded in 3 Playwright test scripts and h
 - Test scripts read credentials from `BARMGMT_TEST_PASSWORD` (or similar), always with a harmless fallback (`"cambiar123"`) for scripts safe to run against a fresh/empty DB — never a real value.
 - Before every commit, grep the staged diff for the current real password/secrets as a final check (`git diff --cached | grep -i <value>`) — caught the leak in `verify-inventario-crud.ts`/`verify-new-modules.ts`/`verify-prod-readonly.ts` this way before a *second* leak happened.
 - If a credential is ever found in history again: rotate first, ask Joan about a history scrub (destructive rewrite + force-push) second — never scrub without his explicit go-ahead, and never treat "removed from the working tree" as equivalent to "safe" once a public push has happened.
-<!-- updated: 2026-07-22 13:09 -->
+<!-- updated: 2026-07-31 00:17 -->
