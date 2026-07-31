@@ -155,6 +155,7 @@ export function ChartCard({
             className="block w-full min-w-[520px] h-auto"
             role="img"
             aria-label={`${headlineLabel}: ${data.length} puntos, desde ${data[0].dateLabel} hasta ${data[data.length - 1].dateLabel}. Pasá el mouse o tabulá por los puntos para ver el detalle de cada día.`}
+            onPointerLeave={() => setHoverIdx(null)}
           >
             <g stroke="var(--border-soft)" strokeWidth={1}>
               {ticks.slice(1, -1).map((t, i) => {
@@ -239,6 +240,7 @@ export function ChartCard({
                     aria-label={`${p.d.dateLabel}: ${formatValue(p.d.current)}`}
                     onPointerEnter={() => setHoverIdx(i)}
                     onPointerDown={() => setHoverIdx(i)}
+                    onPointerLeave={() => setHoverIdx((cur) => (cur === i ? null : cur))}
                     onFocus={() => setHoverIdx(i)}
                     onBlur={() => setHoverIdx((cur) => (cur === i ? null : cur))}
                   />
