@@ -8,7 +8,15 @@
 // page. A build passing is not evidence a page renders. This is.
 //
 // Auth: mints its own Auth.js JWT session cookie using the local dev secret,
-// so no password is needed and nothing is written to the database.
+// so no password is needed.
+//
+// NOT fully read-only, despite this script issuing only GETs: rendering "/"
+// calls getOrCreateBusinessDay(), which upserts a BusinessDay row. Against the
+// production database (there is no dev branch) each run can therefore create an
+// empty BusinessDay for "today" as the machine running it reckons today — which
+// on a UTC-3 laptop is a different timestamp than the one Vercel creates. Two
+// such rows were created by running this before that was noticed. Prefer a Neon
+// dev branch; until then, expect one empty row per day you run it.
 //
 // Usage:
 //   1. BARMGMT_DB_CONN=... npx next dev -p 4002

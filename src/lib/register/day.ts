@@ -1,9 +1,12 @@
 import { prisma } from "@/lib/prisma";
+import { todayInTz } from "@/lib/day-boundary";
 
+// Was `new Date(); d.setHours(0,0,0,0)`, i.e. midnight in the SERVER's timezone.
+// On Vercel (UTC) that rolled the business day at 21:00 Cordoba, mid-service,
+// and produced duplicate BusinessDay rows for the same real day. Always resolve
+// the day in the venue's timezone — see src/lib/day-boundary.ts.
 export function todayDateOnly() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
+  return todayInTz();
 }
 
 export async function getOrCreateBusinessDay(venueId: string, date: Date = todayDateOnly()) {

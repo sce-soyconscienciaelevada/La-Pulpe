@@ -1,5 +1,6 @@
 // Pure helpers safe to import from Client Components — no Prisma import
 // here (see ventas-pos-shared.ts for the same split, same reason).
+import { startOfDayInTz } from "@/lib/day-boundary";
 
 export type FridgeStatus = "verde" | "amarillo" | "rojo" | "sin-lectura";
 
@@ -19,10 +20,12 @@ export const FRIDGE_STATUS_LABEL: Record<FridgeStatus, string> = {
 
 export const DAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
+// Same fix as the business day: setHours(0,0,0,0) resolved midnight in the
+// SERVER's timezone, so on Vercel (UTC) the fridge week shifted a day forward
+// after 21:00 Cordoba. FridgeTempEntry has @@unique([unitId, date]), so that
+// produced the same duplicate-row exposure. See src/lib/day-boundary.ts.
 function atMidnight(d: Date) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
+  return startOfDayInTz(d);
 }
 
 // Monday..Sunday week containing `anchor`.

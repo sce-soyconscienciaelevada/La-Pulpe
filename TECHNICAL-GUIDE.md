@@ -123,7 +123,9 @@ curl -s https://la-pulpe-three.vercel.app/api/version
 
 **`npm run smoke` is not optional, and it is not the same check as `npm run build`.** On 2026-07-30 the Inicio page shipped a 500 through a green `tsc`, a green `next build`, *and* a script that exercised every one of its Prisma queries. The defect was a function prop (`formatValue={formatARS}`) passed from a Server Component to a Client Component — not serializable across the RSC boundary, and it only throws when a request actually renders the page. On a dynamic (`ƒ`) route, nothing at build time can see it. Joan found it by opening the page.
 
-`scripts/smoke.ts` mints its own Auth.js JWT session cookie from the local dev secret, so it needs no password and writes nothing, and it discovers routes from the filesystem so it cannot go stale. It was verified to fail (`FAIL / 500`, exit 1) when the original defect is reintroduced.
+`scripts/smoke.ts` mints its own Auth.js JWT session cookie from the local dev secret, so it needs no password, and it discovers routes from the filesystem so it cannot go stale. It was verified to fail (`FAIL / 500`, exit 1) when the original defect is reintroduced.
+
+It is **not** fully read-only, despite issuing only GETs: rendering `/` calls `getOrCreateBusinessDay()`, which upserts. Against production (no dev branch exists) each run can create one empty `BusinessDay` row for "today" as the running machine reckons it. See §9's business-day timezone entry — this is the same root cause.
 
 Related, post-deploy: `scripts/verify-prod-readonly.ts` runs the same route sweep against live production with a real login (needs `BARMGMT_TEST_PASSWORD`). Both scripts now share route discovery via `scripts/routes.ts` — its route list used to be hardcoded and had gone stale at 14 routes while the app grew to 23, and it only *printed* statuses without ever failing, so a 500 would have scrolled by unnoticed. Both flaws are fixed.
 
@@ -150,4 +152,4 @@ The live admin password was briefly hardcoded in 3 Playwright test scripts and h
 - Test scripts read credentials from `BARMGMT_TEST_PASSWORD` (or similar), always with a harmless fallback (`"cambiar123"`) for scripts safe to run against a fresh/empty DB — never a real value.
 - Before every commit, grep the staged diff for the current real password/secrets as a final check (`git diff --cached | grep -i <value>`) — caught the leak in `verify-inventario-crud.ts`/`verify-new-modules.ts`/`verify-prod-readonly.ts` this way before a *second* leak happened.
 - If a credential is ever found in history again: rotate first, ask Joan about a history scrub (destructive rewrite + force-push) second — never scrub without his explicit go-ahead, and never treat "removed from the working tree" as equivalent to "safe" once a public push has happened.
-<!-- updated: 2026-07-31 00:17 -->
+<!-- updated: 2026-07-31 01:12 -->

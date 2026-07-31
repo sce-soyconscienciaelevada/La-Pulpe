@@ -1,9 +1,16 @@
 // Bump this string on every deploy that should trigger the "actualización
 // disponible" banner + "what's new" popup. Add a matching CHANGELOG entry --
 // that's what the popup shows. See TECHNICAL-GUIDE.md's deploy checklist.
-export const APP_VERSION = "2026-07-30.7";
+export const APP_VERSION = "2026-07-31.1";
 
 export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
+  "2026-07-31.1": {
+    title: "Arreglo importante: el día cambiaba a las 21:00",
+    items: [
+      "El sistema cerraba el día a las 21:00 de Córdoba en vez de a medianoche, así que una noche de trabajo se partía en dos días distintos",
+      "Ahora el día va de medianoche a medianoche, hora de Córdoba, tanto en el Registro diario como en Heladeras",
+    ],
+  },
   "2026-07-30.7": {
     title: "Arreglo: el Inicio no cargaba",
     items: [
