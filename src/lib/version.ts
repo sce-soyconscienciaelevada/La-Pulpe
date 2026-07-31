@@ -1,9 +1,17 @@
 // Bump this string on every deploy that should trigger the "actualización
 // disponible" banner + "what's new" popup. Add a matching CHANGELOG entry --
 // that's what the popup shows. See TECHNICAL-GUIDE.md's deploy checklist.
-export const APP_VERSION = "2026-07-31.1";
+export const APP_VERSION = "2026-07-31.2";
 
 export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
+  "2026-07-31.2": {
+    title: "Inicio: números de ejemplo hasta que arranques a cargar de verdad",
+    items: [
+      "El Inicio ahora muestra cifras de ejemplo (marcadas como tal) hasta que aprietes \"Empezar a cargar mis datos reales\"",
+      "Al confirmar, se guarda ese día como el primer día real — todo lo cargado antes queda afuera de comparaciones y gráficos",
+      "\"Últimas consumiciones\" siempre muestra datos reales, nunca ejemplos",
+    ],
+  },
   "2026-07-31.1": {
     title: "Arreglo importante: el día cambiaba a las 21:00",
     items: [
