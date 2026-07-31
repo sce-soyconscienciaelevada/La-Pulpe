@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { createFeedback, updateFeedbackStatus } from "./actions";
+import { createFeedback, updateFeedbackStatus, resolveFeedback } from "./actions";
 import { Card, Badge } from "@/components/ui";
 
 type Item = {
@@ -14,6 +14,8 @@ type Item = {
   submittedBy: string | null;
   createdAt: string;
   screenshotDataUrl: string | null;
+  resolvedAt: string | null;
+  resolutionNote: string | null;
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -68,12 +70,30 @@ export function FeedbackClient({ items }: { items: Item[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [filter, setFilter] = useState<string>("ALL");
+  const [view, setView] = useState<"active" | "log">("active");
   const [type, setType] = useState<string>("BUG");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [screenshot, setScreenshot] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [pendingResolve, setPendingResolve] = useState<{ itemId: string; status: "DONE" | "WONT_FIX" } | null>(null);
+  const [noteDraft, setNoteDraft] = useState("");
   const pasteAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  const activeItems = items.filter((i) => i.status === "NEW" || i.status === "IN_PROGRESS");
+  const resolvedItems = items
+    .filter((i) => i.status === "DONE" || i.status === "WONT_FIX")
+    .sort((a, b) => new Date(b.resolvedAt ?? b.createdAt).getTime() - new Date(a.resolvedAt ?? a.createdAt).getTime());
+
+  function confirmResolve() {
+    if (!pendingResolve || !noteDraft.trim()) return;
+    startTransition(async () => {
+      await resolveFeedback(pendingResolve.itemId, pendingResolve.status, noteDraft);
+      setPendingResolve(null);
+      setNoteDraft("");
+      router.refresh();
+    });
+  }
 
   async function handlePaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
     const item = Array.from(e.clipboardData.items).find((i) => i.type.startsWith("image/"));
@@ -83,6 +103,39 @@ export function FeedbackClient({ items }: { items: Item[] }) {
     if (!blob) return;
     const compressed = await compressImage(blob);
     setScreenshot(compressed);
+  }
+
+  if (view === "log") {
+    return (
+      <div className="space-y-5">
+        <button onClick={() => setView("active")} className="text-sm text-text-muted hover:text-text">
+          ← Volver a Feedback
+        </button>
+        <div className="space-y-3">
+          {resolvedItems.length === 0 && <p className="text-sm text-text-muted">Todavía no hay nada resuelto.</p>}
+          {resolvedItems.map((item) => (
+            <Card key={item.id}>
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div>
+                  <div className="text-sm text-text-muted">{TYPE_LABELS[item.type] ?? item.type}</div>
+                  <h3 className="font-medium text-text">{item.title}</h3>
+                </div>
+                <Badge tone={STATUS_TONE[item.status]}>{STATUS_LABELS[item.status]}</Badge>
+              </div>
+              <p className="text-sm text-text-muted whitespace-pre-wrap mb-2">{item.description}</p>
+              {item.resolutionNote && (
+                <p className="text-sm text-text bg-bg-elevated rounded-lg px-3 py-2 mb-2 whitespace-pre-wrap">
+                  {item.resolutionNote}
+                </p>
+              )}
+              <div className="text-xs text-text-muted">
+                {item.resolvedAt ? new Date(item.resolvedAt).toLocaleDateString("es-AR") : ""}
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -163,74 +216,118 @@ export function FeedbackClient({ items }: { items: Item[] }) {
         <button onClick={() => setFilter(filter === "NEW" ? "ALL" : "NEW")}>
           <Card className={`text-center ${filter === "NEW" ? "border-accent" : ""}`}>
             <div className="text-xs text-text-muted mb-1">NUEVOS</div>
-            <div className="text-2xl font-bold text-loss">{counts(items).NEW}</div>
+            <div className="text-2xl font-bold text-loss">{counts(activeItems).NEW}</div>
           </Card>
         </button>
         <button onClick={() => setFilter(filter === "IN_PROGRESS" ? "ALL" : "IN_PROGRESS")}>
           <Card className={`text-center ${filter === "IN_PROGRESS" ? "border-accent" : ""}`}>
             <div className="text-xs text-text-muted mb-1">EN PROGRESO</div>
-            <div className="text-2xl font-bold text-comp">{counts(items).IN_PROGRESS}</div>
+            <div className="text-2xl font-bold text-comp">{counts(activeItems).IN_PROGRESS}</div>
           </Card>
         </button>
-        <button onClick={() => setFilter(filter === "DONE" ? "ALL" : "DONE")}>
-          <Card className={`text-center ${filter === "DONE" ? "border-accent" : ""}`}>
+        <button onClick={() => setView("log")}>
+          <Card className="text-center">
             <div className="text-xs text-text-muted mb-1">RESUELTOS</div>
-            <div className="text-2xl font-bold text-profit">{counts(items).DONE}</div>
+            <div className="text-2xl font-bold text-profit">{resolvedItems.length}</div>
           </Card>
         </button>
       </div>
 
       <div className="space-y-3">
-        {(filter === "ALL" ? items : items.filter((i) => i.status === filter)).length === 0 && (
+        {(filter === "ALL" ? activeItems : activeItems.filter((i) => i.status === filter)).length === 0 && (
           <p className="text-sm text-text-muted">Sin reportes{filter !== "ALL" ? " en este estado" : ""}.</p>
         )}
-        {(filter === "ALL" ? items : items.filter((i) => i.status === filter)).map((item) => (
-          <Card key={item.id}>
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <div>
-                <div className="text-sm text-text-muted">{TYPE_LABELS[item.type] ?? item.type}</div>
-                <h3 className="font-medium text-text">{item.title}</h3>
+        {(filter === "ALL" ? activeItems : activeItems.filter((i) => i.status === filter)).map((item) => {
+          const isPendingThis = pendingResolve?.itemId === item.id;
+          return (
+            <Card key={item.id}>
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div>
+                  <div className="text-sm text-text-muted">{TYPE_LABELS[item.type] ?? item.type}</div>
+                  <h3 className="font-medium text-text">{item.title}</h3>
+                </div>
+                <Badge tone={STATUS_TONE[item.status]}>{STATUS_LABELS[item.status]}</Badge>
               </div>
-              <Badge tone={STATUS_TONE[item.status]}>{STATUS_LABELS[item.status]}</Badge>
-            </div>
-            <p className="text-sm text-text-muted whitespace-pre-wrap mb-3">{item.description}</p>
+              <p className="text-sm text-text-muted whitespace-pre-wrap mb-3">{item.description}</p>
 
-            {item.screenshotDataUrl && (
-              <div className="mb-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.screenshotDataUrl}
-                  alt="Captura adjunta"
-                  onClick={() => setExpanded(expanded === item.id ? null : item.id)}
-                  className={`rounded-lg border border-border cursor-pointer transition-all ${
-                    expanded === item.id ? "max-w-full" : "max-h-32"
-                  }`}
-                />
+              {item.screenshotDataUrl && (
+                <div className="mb-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.screenshotDataUrl}
+                    alt="Captura adjunta"
+                    onClick={() => setExpanded(expanded === item.id ? null : item.id)}
+                    className={`rounded-lg border border-border cursor-pointer transition-all ${
+                      expanded === item.id ? "max-w-full" : "max-h-32"
+                    }`}
+                  />
+                </div>
+              )}
+
+              <div className="flex items-center justify-between text-xs text-text-muted">
+                <span>{new Date(item.createdAt).toLocaleDateString("es-AR")}</span>
+                <select
+                  value={isPendingThis ? pendingResolve.status : item.status}
+                  disabled={isPending}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    if (next === "DONE" || next === "WONT_FIX") {
+                      setPendingResolve({ itemId: item.id, status: next });
+                      setNoteDraft("");
+                    } else {
+                      startTransition(async () => {
+                        await updateFeedbackStatus(item.id, next as "NEW" | "IN_PROGRESS");
+                        router.refresh();
+                      });
+                    }
+                  }}
+                  className="rounded-lg border border-border bg-bg-elevated px-2 py-1 text-xs text-text"
+                >
+                  {Object.entries(STATUS_LABELS).map(([k, label]) => (
+                    <option key={k} value={k}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
               </div>
-            )}
 
-            <div className="flex items-center justify-between text-xs text-text-muted">
-              <span>{new Date(item.createdAt).toLocaleDateString("es-AR")}</span>
-              <select
-                value={item.status}
-                disabled={isPending}
-                onChange={(e) =>
-                  startTransition(async () => {
-                    await updateFeedbackStatus(item.id, e.target.value as never);
-                    router.refresh();
-                  })
-                }
-                className="rounded-lg border border-border bg-bg-elevated px-2 py-1 text-xs text-text"
-              >
-                {Object.entries(STATUS_LABELS).map(([k, label]) => (
-                  <option key={k} value={k}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </Card>
-        ))}
+              {isPendingThis && (
+                <div className="mt-3 pt-3 border-t border-border">
+                  <p className="text-xs text-text-muted mb-2">
+                    {pendingResolve.status === "DONE" ? "¿Qué se hizo?" : "¿Por qué no se va a hacer?"} — esto
+                    queda en el log, el reporte desaparece de esta lista.
+                  </p>
+                  <textarea
+                    value={noteDraft}
+                    onChange={(e) => setNoteDraft(e.target.value)}
+                    rows={2}
+                    autoFocus
+                    className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text mb-2 resize-none"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      disabled={isPending || !noteDraft.trim()}
+                      onClick={confirmResolve}
+                      className="rounded-lg bg-accent text-bg font-semibold px-3 py-1.5 text-xs disabled:opacity-50"
+                    >
+                      {pendingResolve.status === "DONE" ? "Marcar resuelto" : "Confirmar"}
+                    </button>
+                    <button
+                      disabled={isPending}
+                      onClick={() => {
+                        setPendingResolve(null);
+                        setNoteDraft("");
+                      }}
+                      className="rounded-lg border border-border px-3 py-1.5 text-xs text-text-muted"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
@@ -240,6 +337,5 @@ function counts(items: Item[]) {
   return {
     NEW: items.filter((i) => i.status === "NEW").length,
     IN_PROGRESS: items.filter((i) => i.status === "IN_PROGRESS").length,
-    DONE: items.filter((i) => i.status === "DONE").length,
   };
 }

@@ -39,11 +39,24 @@ export async function createFeedback(input: {
   revalidatePath("/feedback");
 }
 
-export async function updateFeedbackStatus(id: string, status: FeedbackStatus) {
+// NEW <-> IN_PROGRESS only — moving to DONE/WONT_FIX requires a note via
+// resolveFeedback() so the item can leave the active list without losing
+// the "what happened" context.
+export async function updateFeedbackStatus(id: string, status: Extract<FeedbackStatus, "NEW" | "IN_PROGRESS">) {
   await requireAdmin();
   await prisma.feedbackItem.update({
     where: { id },
-    data: { status, resolvedAt: status === "DONE" ? new Date() : null },
+    data: { status, resolvedAt: null, resolutionNote: null },
+  });
+  revalidatePath("/feedback");
+}
+
+export async function resolveFeedback(id: string, status: Extract<FeedbackStatus, "DONE" | "WONT_FIX">, note: string) {
+  await requireAdmin();
+  if (!note.trim()) return;
+  await prisma.feedbackItem.update({
+    where: { id },
+    data: { status, resolvedAt: new Date(), resolutionNote: note.trim() },
   });
   revalidatePath("/feedback");
 }

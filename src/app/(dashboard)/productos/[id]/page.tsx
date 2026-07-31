@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card } from "@/components/ui";
+import { PageHeader, Card, BackLink } from "@/components/ui";
 import { ProductForm } from "../ProductForm";
 import { updateProduct, deleteProduct } from "../actions";
 import { DeleteButton } from "./DeleteButton";
@@ -27,6 +27,7 @@ export default async function EditProductoPage({ params }: { params: Promise<{ i
 
   return (
     <div>
+      <BackLink href="/productos" label="Volver a Productos" />
       <PageHeader title={product.name} />
       <Card>
         <ProductForm

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card } from "@/components/ui";
+import { PageHeader, Card, BackLink } from "@/components/ui";
 import { ProductForm } from "../ProductForm";
 import { createProduct } from "../actions";
 
@@ -10,6 +10,7 @@ export default async function NuevoProductoPage() {
 
   return (
     <div>
+      <BackLink href="/productos" label="Volver a Productos" />
       <PageHeader title="Nuevo producto" />
       <Card>
         <ProductForm
