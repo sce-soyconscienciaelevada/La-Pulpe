@@ -281,7 +281,7 @@ export default async function InicioPage() {
 
           <Card>
             <SectionHead title="Ventas por categoría" hint={isDemo ? "ejemplo" : undefined} />
-            <Donut items={categorySales} total={categoryTotal} formatValue={formatARS} />
+            <Donut items={categorySales} total={categoryTotal} />
           </Card>
         </div>
       </div>

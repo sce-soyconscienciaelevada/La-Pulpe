@@ -1,9 +1,16 @@
 // Bump this string on every deploy that should trigger the "actualización
 // disponible" banner + "what's new" popup. Add a matching CHANGELOG entry --
 // that's what the popup shows. See TECHNICAL-GUIDE.md's deploy checklist.
-export const APP_VERSION = "2026-07-31.4";
+export const APP_VERSION = "2026-07-31.5";
 
 export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
+  "2026-07-31.5": {
+    title: "Gráfico fijo al pasar el mouse + torta interactiva",
+    items: [
+      "Inicio: el recuadro de detalle del gráfico ya no salta de lugar al mover el mouse — queda fijo arriba a la derecha",
+      "Inicio: la torta de \"Ventas por categoría\" ahora responde al pasar el mouse — resalta la porción y muestra su nombre, monto y porcentaje en el centro",
+    ],
+  },
   "2026-07-31.4": {
     title: "Arreglo: Heladeras \"semana siguiente\" + gráfico del Inicio",
     items: [

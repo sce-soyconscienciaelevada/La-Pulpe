@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { formatARS } from "./ui";
 
 // Ported from the approved mockup
@@ -55,9 +55,6 @@ export function ChartCard({
     format === "currency" ? formatARS(n) : new Intl.NumberFormat("es-AR").format(n);
   const [seriesIdx, setSeriesIdx] = useState(0);
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const tipRef = useRef<HTMLDivElement>(null);
 
   const active = series[seriesIdx] ?? series[0];
   const data = active?.data ?? [];
@@ -117,48 +114,8 @@ export function ChartCard({
     return ((point.current - point.previous) / point.previous) * 100;
   }
 
-  function placeTooltip(px: number, py: number) {
-    const svg = svgRef.current;
-    const wrap = wrapRef.current;
-    const tip = tipRef.current;
-    if (!svg || !wrap || !tip) return;
-    const svgBox = svg.getBoundingClientRect();
-    const wrapBox = wrap.getBoundingClientRect();
-    const sx = svgBox.width / VIEW_W;
-    const sy = svgBox.height / VIEW_H;
-    const offsetX = svgBox.left - wrapBox.left + wrap.scrollLeft;
-    const offsetY = svgBox.top - wrapBox.top;
-
-    const screenX = px * sx + offsetX;
-    const screenY = py * sy + offsetY;
-    const tw = tip.offsetWidth;
-    const th = tip.offsetHeight;
-
-    let top = screenY - th - 12;
-    if (top < 0) top = screenY + 14;
-
-    // Centering the tooltip on the point covers the point's own curve segment
-    // when it's near an edge — for a point in the left ~35% of the plot, that
-    // hides the segment leading up to it (looked like the fill/line vanished
-    // on hover). Offset to the side with more room instead of straddling it.
-    const plotFrac = (px - PLOT_LEFT) / (PLOT_RIGHT - PLOT_LEFT || 1);
-    let left: number;
-    if (plotFrac < 0.35) left = screenX + 14;
-    else if (plotFrac > 0.65) left = screenX - tw - 14;
-    else left = screenX - tw / 2;
-    const maxLeft = svgBox.width + offsetX - tw;
-    if (left < offsetX) left = offsetX;
-    if (left > maxLeft) left = Math.max(offsetX, maxLeft);
-
-    tip.style.transform = `translate(${Math.round(left)}px,${Math.round(top)}px)`;
-  }
-
   const hovered = hoverIdx !== null ? points[hoverIdx] : null;
   const hoveredDelta = hovered ? deltaOf(hovered.d) : null;
-
-  useEffect(() => {
-    if (hovered) placeTooltip(hovered.x, hovered.yCur);
-  });
 
   return (
     <section className="bg-bg-card border border-border rounded-md" aria-label={title}>
@@ -192,9 +149,8 @@ export function ChartCard({
       </div>
 
       <div className="p-4 sm:p-5">
-        <div ref={wrapRef} className="relative overflow-x-auto">
+        <div className="relative overflow-x-auto">
           <svg
-            ref={svgRef}
             viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
             className="block w-full min-w-[520px] h-auto"
             role="img"
@@ -291,11 +247,14 @@ export function ChartCard({
             </g>
           </svg>
 
+          {/* Fixed in the top-right corner rather than anchored to the hovered
+              point — an anchored tooltip that jumps around as you move the
+              mouse read as "the chart is moving." Position never changes here,
+              only the content and its opacity do. */}
           <div
-            ref={tipRef}
             role="status"
             aria-live="polite"
-            className={`absolute top-0 left-0 pointer-events-none rounded-md min-w-[190px] px-2.5 py-2 font-mono text-[0.6875rem] leading-relaxed shadow-lg z-10 transition-opacity duration-100 ${
+            className={`absolute top-0 right-0 pointer-events-none rounded-md min-w-[190px] px-2.5 py-2 font-mono text-[0.6875rem] leading-relaxed shadow-lg z-10 transition-opacity duration-150 ${
               hovered ? "opacity-100" : "opacity-0 invisible"
             }`}
             style={{ background: "var(--bg-elevated)", color: "var(--text)", border: "1px solid var(--border)" }}
