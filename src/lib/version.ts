@@ -1,9 +1,18 @@
 // Bump this string on every deploy that should trigger the "actualización
 // disponible" banner + "what's new" popup. Add a matching CHANGELOG entry --
 // that's what the popup shows. See TECHNICAL-GUIDE.md's deploy checklist.
-export const APP_VERSION = "2026-07-30.5";
+export const APP_VERSION = "2026-07-30.6";
 
 export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
+  "2026-07-30.6": {
+    title: "Inicio renovado — gráfico, mezcla de consumo y torta por categoría",
+    items: [
+      "Inicio: las 4 cifras de arriba ahora muestran comparación real contra el mismo día de la semana pasada (no solo el número de hoy)",
+      "Inicio: nuevo gráfico de ventas de los últimos 14 días o del mes, con detalle al pasar el mouse o tocar cada punto",
+      "Inicio: nueva barra de mezcla de consumo (venta / dueños / cortesía / banda) y torta de ventas por categoría",
+      "Inicio: tabla de últimas consumiciones en vivo con hora, tipo, para quién, importe y margen",
+    ],
+  },
   "2026-07-30.5": {
     title: "Nuevos gráficos (todavía no visibles)",
     items: [
