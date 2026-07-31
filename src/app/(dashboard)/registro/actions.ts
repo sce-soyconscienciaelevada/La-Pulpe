@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
+import { properName } from "@/lib/text-normalize";
 import { recordConsumption } from "@/lib/stock/movements";
 import { getOrCreateBusinessDay, closeBusinessDay, clearBusinessDay } from "@/lib/register/day";
 import type { ConsumptionType } from "@/generated/prisma/enums";
@@ -40,7 +41,7 @@ export async function addFreeTextConsumption(
   await recordConsumption({
     venueId: venue.id,
     businessDayId: day.id,
-    freeText: freeText.trim(),
+    freeText: properName(freeText),
     type,
     quantity,
     personId,
@@ -53,7 +54,7 @@ export async function addOwner(name: string) {
   await requireAdmin();
   if (!name.trim()) return;
   const venue = await prisma.venue.findFirstOrThrow();
-  await prisma.person.create({ data: { venueId: venue.id, name: name.trim(), kind: "OWNER" } });
+  await prisma.person.create({ data: { venueId: venue.id, name: properName(name), kind: "OWNER" } });
   revalidatePath("/registro");
 }
 
@@ -65,7 +66,7 @@ export async function addReorderItem(name: string, quantity: number, supplierId?
     data: {
       venueId: venue.id,
       businessDayId: day.id,
-      name: name.trim(),
+      name: properName(name),
       quantity,
       supplierId,
       supplierLabel,

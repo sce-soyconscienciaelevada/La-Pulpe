@@ -75,6 +75,15 @@ body {
   box-sizing: border-box;
 }
 
+/* Tailwind v4 preflight leaves buttons at the browser default (cursor:
+   default), not cursor:pointer — reads as "not clickable" on plain bordered
+   buttons that have no other affordance (color, underline). Restore the
+   pointer everywhere except when explicitly disabled. */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
 ::-webkit-scrollbar {
   height: 8px;
   width: 8px;

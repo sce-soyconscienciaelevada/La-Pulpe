@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
+import { properName } from "@/lib/text-normalize";
 import { getOrCreateOpenMonth, addWeekEntry, currentMonthLabel } from "@/lib/glassware";
 
 export async function recordGlasswareCount(weekEntryId: string, itemId: string, countedQuantity: number) {
@@ -48,7 +49,7 @@ export async function createGlasswareItem(input: {
     data: {
       venueId: input.venueId,
       code: input.code.trim(),
-      name: input.name.trim(),
+      name: properName(input.name),
       location: input.location,
       stockBase: input.stockBase || 0,
     },

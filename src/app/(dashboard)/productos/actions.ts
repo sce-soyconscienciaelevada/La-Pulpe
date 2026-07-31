@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
+import { properName } from "@/lib/text-normalize";
 
 function num(formData: FormData, key: string): number | null {
   const v = formData.get(key);
@@ -24,7 +25,7 @@ export async function createProduct(formData: FormData) {
     data: {
       venueId: venue.id,
       categoryId: String(formData.get("categoryId")),
-      name: String(formData.get("name")),
+      name: properName(String(formData.get("name"))),
       containerLabel: (formData.get("containerLabel") as string) || null,
       servingsPerContainer: num(formData, "servingsPerContainer") ?? 1,
       costPricePerContainer: num(formData, "costPricePerContainer") ?? 0,
@@ -47,7 +48,7 @@ export async function updateProduct(id: string, formData: FormData) {
   await prisma.product.update({
     where: { id },
     data: {
-      name: String(formData.get("name")),
+      name: properName(String(formData.get("name"))),
       categoryId: String(formData.get("categoryId")),
       containerLabel: (formData.get("containerLabel") as string) || null,
       servingsPerContainer: num(formData, "servingsPerContainer") ?? 1,

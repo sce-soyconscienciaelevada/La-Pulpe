@@ -3,11 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
+import { properName } from "@/lib/text-normalize";
 
 export async function createSupplier(formData: FormData) {
   await requireAdmin();
   const venue = await prisma.venue.findFirstOrThrow();
-  const name = String(formData.get("name") || "").trim();
+  const name = properName(String(formData.get("name") || ""));
   if (!name) return;
   await prisma.supplier.create({
     data: {

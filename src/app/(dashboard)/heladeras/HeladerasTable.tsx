@@ -64,18 +64,23 @@ export function HeladerasTable({
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-2">
         <button
-          onClick={() => router.push(`/heladeras?week=${shiftWeek(weekDates[0], -7)}`)}
-          className="rounded-lg border border-border text-text px-3 py-1.5 text-sm"
+          type="button"
+          disabled={isPending}
+          onClick={() => startTransition(() => router.push(`/heladeras?week=${shiftWeek(weekDates[0], -7)}`))}
+          className="rounded-lg border border-border text-text px-3 py-1.5 text-sm disabled:opacity-50"
         >
           ← Semana anterior
         </button>
         <Badge tone="accent">
-          {new Date(`${weekDates[0]}T00:00:00`).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" })} al{" "}
-          {new Date(`${weekDates[6]}T00:00:00`).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" })}
+          {isPending
+            ? "Cargando…"
+            : `${new Date(`${weekDates[0]}T00:00:00`).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" })} al ${new Date(`${weekDates[6]}T00:00:00`).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" })}`}
         </Badge>
         <button
-          onClick={() => router.push(`/heladeras?week=${shiftWeek(weekDates[0], 7)}`)}
-          className="rounded-lg border border-border text-text px-3 py-1.5 text-sm"
+          type="button"
+          disabled={isPending}
+          onClick={() => startTransition(() => router.push(`/heladeras?week=${shiftWeek(weekDates[0], 7)}`))}
+          className="rounded-lg border border-border text-text px-3 py-1.5 text-sm disabled:opacity-50"
         >
           Semana siguiente →
         </button>
