@@ -23,6 +23,12 @@ model Venue {
   currency  String   @default("ARS")
   createdAt DateTime @default(now())
 
+  // Null = the dashboard is still showing sample figures so the owner can see
+  // what it looks like populated. Set (to Cordoba midnight of the day the
+  // owner pressed "empezar") = day one; everything before it is ignored, which
+  // also walls off the test/duplicate rows created before real use began.
+  realDataStartedAt DateTime?
+
   users                 User[]
   people                Person[]
   categories            Category[]
