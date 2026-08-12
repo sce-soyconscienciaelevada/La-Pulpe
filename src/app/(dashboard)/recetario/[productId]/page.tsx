@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card } from "@/components/ui";
-import { ProductIcon } from "@/components/ProductIcon";
+import { PageHeader, BackLink } from "@/components/ui";
+import { computePricing } from "@/lib/pricing";
 import { FichaTecnicaForm } from "./FichaTecnicaForm";
+import { IngredientGrid } from "./IngredientGrid";
 
 export default async function FichaTecnicaPage({ params }: { params: Promise<{ productId: string }> }) {
   const { productId } = await params;
@@ -10,13 +11,44 @@ export default async function FichaTecnicaPage({ params }: { params: Promise<{ p
     where: { productId },
     include: {
       product: true,
-      ingredients: { include: { ingredientProduct: { include: { category: true } } } },
+      ingredients: { include: { ingredientProduct: true } },
     },
   });
   if (!recipe) notFound();
 
+  const venueIngredientProducts = await prisma.product.findMany({
+    where: { venueId: recipe.product.venueId, isRecipeIngredient: true },
+  });
+  const knownIngredients = venueIngredientProducts.map((p) => ({
+    norm: p.name
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, " "),
+    name: p.name,
+    costPerServing: computePricing({
+      costPricePerContainer: p.costPricePerContainer,
+      servingsPerContainer: p.servingsPerContainer,
+      salePricePerServing: null,
+    }).costPerServing,
+  }));
+
+  const initialRows = recipe.ingredients.map((i) => ({
+    recipeIngredientId: i.id,
+    name: i.ingredientProduct.name,
+    oz: i.uom === "ML" ? i.quantity : null,
+    gr: i.uom === "GRAMOS" ? i.quantity : null,
+    costPerServing: computePricing({
+      costPricePerContainer: i.ingredientProduct.costPricePerContainer,
+      servingsPerContainer: i.ingredientProduct.servingsPerContainer,
+      salePricePerServing: null,
+    }).costPerServing,
+  }));
+
   return (
     <div>
+      <BackLink href="/recetario" label="Volver a Recetario" />
       <PageHeader title={recipe.product.name} subtitle="Ficha técnica" />
 
       <div className="grid lg:grid-cols-2 gap-4">
@@ -32,34 +64,13 @@ export default async function FichaTecnicaPage({ params }: { params: Promise<{ p
         />
 
         <div className="space-y-4">
-          <Card>
-            <h3 className="font-semibold text-text mb-3">Ingredientes</h3>
-            <ul className="text-sm text-text space-y-1">
-              {recipe.ingredients.map((i) => (
-                <li key={i.id} className="flex items-center gap-1.5">
-                  <span>{i.quantity} medida(s) de</span>
-                  <ProductIcon
-                    categoryName={i.ingredientProduct.category?.name}
-                    className="inline-block w-4 h-4 shrink-0 text-text-muted"
-                  />
-                  <span>{i.ingredientProduct.name}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="text-xs text-text-muted mt-3">
-              Para cambiar ingredientes o el costo, andá a{" "}
-              <a href="/costeo" className="text-accent underline">
-                Costeo & Recetas
-              </a>
-              .
-            </p>
-          </Card>
+          <IngredientGrid recipeId={recipe.id} initialRows={initialRows} knownIngredients={knownIngredients} />
 
           <a
             href={`/api/reportes/ficha-tecnica?productId=${productId}`}
             target="_blank"
             rel="noreferrer"
-            className="block text-center rounded-lg bg-accent text-bg font-semibold py-3"
+            className="block text-center rounded-lg border border-border text-text font-semibold py-3"
           >
             🖨️ Imprimir ficha técnica
           </a>
