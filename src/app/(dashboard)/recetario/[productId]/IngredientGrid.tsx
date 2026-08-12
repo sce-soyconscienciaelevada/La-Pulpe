@@ -45,6 +45,13 @@ function money(n: number) {
   return `$${n.toFixed(2)}`;
 }
 
+// 6 slots, not 8: Ml is pure derived display (Oz×30, shown inline instead of
+// its own column) and "Costo líquidos"/"Costo sólidos" are mutually
+// exclusive per row (Excel's own G/I either-or) — merged into one "Costo"
+// output column. Both were eating width the actual cost figure needed to be
+// visible without scrolling on a half-width dashboard card.
+const GRID_COLS = "2.1fr 0.8fr 0.8fr 1fr 1fr 26px";
+
 export function IngredientGrid({
   recipeId,
   initialRows,
@@ -159,31 +166,31 @@ export function IngredientGrid({
       <p className="text-xs text-text-muted mb-4">Cargá cada fila como en el Excel — Oz o Gr, nunca los dos.</p>
 
       <div className="overflow-x-auto">
-        <div className="grid gap-x-2 gap-y-1.5 min-w-[640px]" style={{ gridTemplateColumns: "1.9fr 0.7fr 0.6fr 0.7fr 0.95fr 0.85fr 0.85fr 28px" }}>
+        <div className="min-w-[300px]">
+        <div className="grid gap-x-2 gap-y-1.5 items-start" style={{ gridTemplateColumns: GRID_COLS }}>
           <span className="text-[9.5px] font-bold tracking-wide uppercase text-text-faint pb-1.5 border-b border-border">Descripción</span>
           <span className="text-[9.5px] font-bold tracking-wide uppercase text-text-faint pb-1.5 border-b border-border text-right">Oz</span>
-          <span className="text-[9.5px] font-bold tracking-wide uppercase text-text-faint pb-1.5 border-b border-border text-right">Ml</span>
           <span className="text-[9.5px] font-bold tracking-wide uppercase text-text-faint pb-1.5 border-b border-border text-right">Gr</span>
           <span className="text-[9.5px] font-bold tracking-wide uppercase text-text-faint pb-1.5 border-b border-border text-right">Costo Lt/Kg</span>
-          <span className="text-[9.5px] font-bold tracking-wide uppercase text-text-faint pb-1.5 border-b border-border text-right">Costo líq.</span>
-          <span className="text-[9.5px] font-bold tracking-wide uppercase text-text-faint pb-1.5 border-b border-border text-right">Costo sól.</span>
+          <span className="text-[9.5px] font-bold tracking-wide uppercase text-text-faint pb-1.5 border-b border-border text-right">Costo</span>
           <span></span>
 
           {rows.map((row) => {
             const m = rowMath(row);
             const isKnown = !!m.known;
+            const costo = m.costoLiquidos > 0 ? m.costoLiquidos : m.costoSolidos;
             return (
               <Fragment key={row.key}>
-                <div className="relative flex items-center">
+                <div className="min-w-0">
                   <input
                     value={row.name}
                     onChange={(e) => updateRow(row.key, { name: e.target.value })}
                     placeholder="Ingrediente"
-                    className="w-full rounded-md border border-border bg-bg-elevated px-2 py-1.5 text-xs text-text pr-16"
+                    className="w-full rounded-md border border-border bg-bg-elevated px-2 py-1.5 text-xs text-text"
                   />
                   {row.name.trim() && (
                     <span
-                      className={`absolute right-1.5 text-[8.5px] font-bold uppercase px-1.5 py-0.5 rounded-full ${
+                      className={`inline-block mt-1 text-[8.5px] font-bold uppercase px-1.5 py-0.5 rounded-full ${
                         isKnown ? "text-accent bg-accent-soft" : "text-[#d9b98f] bg-[#d9b98f22]"
                       }`}
                     >
@@ -191,21 +198,17 @@ export function IngredientGrid({
                     </span>
                   )}
                 </div>
-                <input
-                  key={`${row.key}-oz`}
-                  value={row.oz}
-                  onChange={(e) => updateRow(row.key, { oz: e.target.value })}
-                  placeholder="—"
-                  inputMode="decimal"
-                  className="w-full rounded-md border border-border bg-bg-elevated px-2 py-1.5 text-xs text-text text-right tabular-nums"
-                />
-                <input
-                  key={`${row.key}-ml`}
-                  value={m.ml !== null ? m.ml.toFixed(0) : ""}
-                  disabled
-                  placeholder="—"
-                  className="w-full rounded-md border border-border-soft bg-transparent px-2 py-1.5 text-xs text-text-muted text-right tabular-nums"
-                />
+                <div>
+                  <input
+                    key={`${row.key}-oz`}
+                    value={row.oz}
+                    onChange={(e) => updateRow(row.key, { oz: e.target.value })}
+                    placeholder="—"
+                    inputMode="decimal"
+                    className="w-full rounded-md border border-border bg-bg-elevated px-2 py-1.5 text-xs text-text text-right tabular-nums"
+                  />
+                  {m.ml !== null && <div className="text-[9px] text-text-faint text-right mt-0.5">{m.ml.toFixed(0)}ml</div>}
+                </div>
                 <input
                   key={`${row.key}-gr`}
                   value={row.gr}
@@ -233,22 +236,16 @@ export function IngredientGrid({
                   />
                 )}
                 <input
-                  key={`${row.key}-cl`}
-                  value={m.costoLiquidos > 0 ? money(m.costoLiquidos) : "—"}
+                  key={`${row.key}-c`}
+                  value={costo > 0 ? money(costo) : "—"}
                   disabled
-                  className="w-full rounded-md border border-border-soft bg-transparent px-2 py-1.5 text-xs text-text-muted text-right tabular-nums"
-                />
-                <input
-                  key={`${row.key}-cs`}
-                  value={m.costoSolidos > 0 ? money(m.costoSolidos) : "—"}
-                  disabled
-                  className="w-full rounded-md border border-border-soft bg-transparent px-2 py-1.5 text-xs text-text-muted text-right tabular-nums"
+                  className="w-full rounded-md border border-border-soft bg-transparent px-2 py-1.5 text-xs text-text-muted text-right tabular-nums font-semibold"
                 />
                 <button
                   key={`${row.key}-del`}
                   onClick={() => removeRow(row.key)}
                   aria-label="Quitar ingrediente"
-                  className="w-[26px] h-[26px] rounded-md border border-border text-text-faint text-xs"
+                  className="w-[26px] h-[26px] rounded-md border border-border text-text-faint text-xs justify-self-end"
                 >
                   ✕
                 </button>
@@ -256,27 +253,26 @@ export function IngredientGrid({
             );
           })}
         </div>
-      </div>
 
-      <button
-        onClick={addRow}
-        className="mt-2.5 w-full text-left text-xs text-accent border border-dashed border-border rounded-md px-3 py-2"
-      >
-        + Agregar ingrediente
-      </button>
+        <button
+          onClick={addRow}
+          className="mt-2.5 w-full text-left text-xs text-accent border border-dashed border-border rounded-md px-3 py-2"
+        >
+          + Agregar ingrediente
+        </button>
 
-      <div
-        className="grid gap-x-2 mt-3 pt-2.5 border-t border-border text-xs font-bold tabular-nums min-w-[640px]"
-        style={{ gridTemplateColumns: "1.9fr 0.7fr 0.6fr 0.7fr 0.95fr 0.85fr 0.85fr 28px" }}
-      >
-        <span>Total</span>
-        <span className="text-right">{totals.oz.toFixed(2)}</span>
-        <span className="text-right">{totals.ml.toFixed(0)}</span>
-        <span className="text-right">{totals.gr.toFixed(2)}</span>
-        <span></span>
-        <span className="text-right">{money(totals.costoLiquidos)}</span>
-        <span className="text-right">{money(totals.costoSolidos)}</span>
-        <span></span>
+        <div
+          className="grid gap-x-2 mt-3 pt-2.5 border-t border-border text-xs font-bold tabular-nums"
+          style={{ gridTemplateColumns: GRID_COLS }}
+        >
+          <span>Total</span>
+          <span className="text-right">{totals.oz.toFixed(2)}</span>
+          <span className="text-right">{totals.gr.toFixed(2)}</span>
+          <span></span>
+          <span className="text-right">{money(totals.costoLiquidos + totals.costoSolidos)}</span>
+          <span></span>
+        </div>
+        </div>
       </div>
 
       <div className="flex items-baseline justify-between mt-4 px-3.5 py-3 rounded-lg bg-accent-soft border border-accent/25">

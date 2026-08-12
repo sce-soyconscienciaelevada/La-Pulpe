@@ -10,7 +10,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const venue = await prisma.venue.findFirst();
 
   return (
-    <div className="min-h-screen flex bg-bg">
+    <div className="min-h-screen flex flex-col md:flex-row bg-bg">
       <Sidebar
         venueName={venue?.name ?? "Bar"}
         userEmail={user.email ?? ""}

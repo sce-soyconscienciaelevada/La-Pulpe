@@ -1,9 +1,16 @@
 // Bump this string on every deploy that should trigger the "actualización
 // disponible" banner + "what's new" popup. Add a matching CHANGELOG entry --
 // that's what the popup shows. See TECHNICAL-GUIDE.md's deploy checklist.
-export const APP_VERSION = "2026-08-12.1";
+export const APP_VERSION = "2026-08-12.2";
 
 export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
+  "2026-08-12.2": {
+    title: "Arreglo: la app se veía apretada en el celular",
+    items: [
+      "Todas las pantallas (no solo Recetario) se veían mal en el celular — el contenido quedaba apretado en una franja angosta al costado. Ya está arreglado en toda la app.",
+      "Recetario: la tabla de ingredientes ahora entra completa en la pantalla del celular, sin tener que deslizar para ver el costo.",
+    ],
+  },
   "2026-08-12.1": {
     title: "Recetario: ingredientes editables + ficha técnica en PDF prolija",
     items: [

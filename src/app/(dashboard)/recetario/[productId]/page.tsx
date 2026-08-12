@@ -52,6 +52,7 @@ export default async function FichaTecnicaPage({ params }: { params: Promise<{ p
       <PageHeader title={recipe.product.name} subtitle="Ficha técnica" />
 
       <div className="grid lg:grid-cols-2 gap-4">
+        <div className="min-w-0">
         <FichaTecnicaForm
           productId={productId}
           initial={{
@@ -62,8 +63,9 @@ export default async function FichaTecnicaPage({ params }: { params: Promise<{ p
             glassLabel: recipe.glassLabel ?? "",
           }}
         />
+        </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 min-w-0">
           <IngredientGrid recipeId={recipe.id} initialRows={initialRows} knownIngredients={knownIngredients} />
 
           <a
