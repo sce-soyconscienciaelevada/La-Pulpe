@@ -62,7 +62,7 @@ export async function GET(request: Request) {
     <Document>
       <Page size="A4" style={styles.page}>
         <Text style={styles.title}>{venue.name.toUpperCase()}</Text>
-        <Text style={styles.subtitle}>Reporte Semanal de Venta — Ventas POS</Text>
+        <Text style={styles.subtitle}>Reporte Semanal de Venta · Ventas POS</Text>
         <Text style={styles.periodLabel}>{period.label}</Text>
 
         {period.categories.map((cat) => {
@@ -70,7 +70,7 @@ export async function GET(request: Request) {
           return (
             <View key={cat.id} style={styles.section} wrap={false}>
               <Text style={styles.sectionTitle}>
-                {cat.name} ({catTotal} uds — {cat.lines.length} ítems)
+                {cat.name} ({catTotal} uds, {cat.lines.length} ítems)
               </Text>
               <View style={styles.headerRow}>
                 <Text style={styles.cellCode}>Cód</Text>

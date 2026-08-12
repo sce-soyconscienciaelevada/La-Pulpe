@@ -111,7 +111,7 @@ export function HeladerasTable({
               <Fragment key={unit.id}>
                 <tr className="border-b border-border/50">
                   <td className="px-3 py-2 text-text whitespace-nowrap font-medium">
-                    {unit.code} — {unit.name}
+                    {unit.code} · {unit.name}
                   </td>
                   {weekDates.map((day) => (
                     <td key={day} className="px-1 py-1 text-center">
@@ -154,7 +154,7 @@ export function HeladerasTable({
 
       <Card>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-text">¿Algo salió mal? — Incidencias</h3>
+          <h3 className="font-semibold text-text">Incidencias · ¿algo salió mal?</h3>
           <button onClick={() => setShowIncidentForm(!showIncidentForm)} className="text-sm text-accent underline">
             {showIncidentForm ? "cancelar" : "+ reportar"}
           </button>
@@ -195,7 +195,7 @@ export function HeladerasTable({
                   <td className="px-3 py-2 text-text-muted">{inc.tempRecorded ?? "—"}</td>
                   <td className="px-3 py-2 text-text">
                     {inc.actionTaken}
-                    {inc.responsibleName && <span className="text-text-muted"> — {inc.responsibleName}</span>}
+                    {inc.responsibleName && <span className="text-text-muted"> · {inc.responsibleName}</span>}
                   </td>
                   <td className="px-2 py-2">
                     <button
@@ -250,7 +250,7 @@ function IncidentForm({
       >
         {units.map((u) => (
           <option key={u.id} value={u.id}>
-            {u.code} — {u.name}
+            {u.code} · {u.name}
           </option>
         ))}
       </select>

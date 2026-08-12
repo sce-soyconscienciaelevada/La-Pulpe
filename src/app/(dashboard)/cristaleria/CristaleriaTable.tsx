@@ -78,7 +78,7 @@ export function CristaleriaTable({
       )}
 
       <GlasswareSection
-        title="1. Barra — Cristalería y Vajilla"
+        title="1. Barra: Cristalería y Vajilla"
         location="BARRA"
         venueId={venueId}
         items={barraItems}
@@ -89,7 +89,7 @@ export function CristaleriaTable({
         router={router}
       />
       <GlasswareSection
-        title="2. Depósito — Cristalería y Vajilla"
+        title="2. Depósito: Cristalería y Vajilla"
         location="DEPOSITO"
         venueId={venueId}
         items={depositoItems}

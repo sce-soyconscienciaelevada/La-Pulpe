@@ -134,7 +134,7 @@ export function ComprasClient({
           ))}
           {reorderItems.length === 0 && (
             <p className="text-sm text-text-muted">
-              Sin pedidos pendientes — se agregan desde Registro diario → Pedido.
+              Sin pedidos pendientes. Se agregan desde Registro diario → Pedido.
             </p>
           )}
         </div>

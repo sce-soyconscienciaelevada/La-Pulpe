@@ -30,7 +30,7 @@ export default async function VentasPosPage() {
     <div>
       <PageHeader
         title="Ventas POS"
-        subtitle="Comparación semanal de ventas — transcripción del ticket TOTALES del POS"
+        subtitle="Comparación semanal de ventas: transcripción del ticket TOTALES del POS"
       />
       <div className="space-y-5">
         <VentasPosClient

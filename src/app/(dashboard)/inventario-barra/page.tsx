@@ -49,7 +49,7 @@ export default async function InventarioBarraPage() {
     <div>
       <PageHeader
         title="Inventario de Barra"
-        subtitle="Control diario de botellas abiertas — sistema de puntos, cierre de turno"
+        subtitle="Control diario de botellas abiertas: sistema de puntos, cierre de turno"
       />
       {rows.length === 0 ? (
         <p className="text-sm text-text-muted">

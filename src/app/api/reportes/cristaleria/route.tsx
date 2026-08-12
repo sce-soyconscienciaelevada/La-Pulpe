@@ -108,17 +108,17 @@ export async function GET() {
       <Page size="A4" orientation="landscape" style={styles.page}>
         <Text style={styles.title}>{venue.name.toUpperCase()}</Text>
         <Text style={styles.subtitle}>Control de Cristalería y Vajilla</Text>
-        <Text style={styles.monthLabel}>Control Mensual de Stock — {monthPeriod.label}</Text>
+        <Text style={styles.monthLabel}>Control Mensual de Stock: {monthPeriod.label}</Text>
 
-        <Section title="1. Barra — Cristalería y Vajilla" location="BARRA" />
-        <Section title="2. Depósito — Cristalería y Vajilla" location="DEPOSITO" />
+        <Section title="1. Barra: Cristalería y Vajilla" location="BARRA" />
+        <Section title="2. Depósito: Cristalería y Vajilla" location="DEPOSITO" />
 
         <Text style={styles.obsLabel}>Observaciones e incidencias:</Text>
         <View style={styles.obsBox} />
 
         <View style={styles.signRow}>
-          <Text style={styles.signLine}>Firma — Responsable de Barra</Text>
-          <Text style={styles.signLine}>Firma — Gerencia</Text>
+          <Text style={styles.signLine}>Firma: Responsable de Barra</Text>
+          <Text style={styles.signLine}>Firma: Gerencia</Text>
         </View>
       </Page>
     </Document>

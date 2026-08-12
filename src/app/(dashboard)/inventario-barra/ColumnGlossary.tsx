@@ -8,8 +8,8 @@ const COLUMNS: { label: string; explanation: string }[] = [
   { label: "Ent.", explanation: "Entradas: botellas que subieron de bodega a la barra durante el turno." },
   { label: "Venta x Punto", explanation: "Total consumido en el día, en décimos de botella (1 punto = 1 medida de 2oz). Se carga a mano según lo que se fue marcando en la botella abierta." },
   { label: "Vent. Final Teórico", explanation: "Lo que debería quedar según lo registrado: Exist. + Ent. − Venta x Punto." },
-  { label: "Referencia Registro", explanation: "Lo que el Registro diario (la grilla de ventas) ya contabilizó automáticamente para ese producto — se muestra solo como comparación, no reemplaza la carga manual." },
-  { label: "Contado físico", explanation: "Lo que se cuenta a mano al cerrar el turno — la medición real de la botella." },
+  { label: "Referencia Registro", explanation: "Lo que el Registro diario (la grilla de ventas) ya contabilizó automáticamente para ese producto. Se muestra solo como comparación, no reemplaza la carga manual." },
+  { label: "Contado físico", explanation: "Lo que se cuenta a mano al cerrar el turno: la medición real de la botella." },
   { label: "Diferencia", explanation: "Contado físico menos Final Teórico. Si coincide, está correcto. Si es menor, hay merma o venta no registrada. Si es mayor, hay un error de carga." },
 ];
 

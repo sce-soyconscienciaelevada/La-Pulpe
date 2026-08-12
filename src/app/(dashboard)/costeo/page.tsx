@@ -44,7 +44,7 @@ export default async function CosteoPage() {
     <div>
       <PageHeader
         title="Costeo & Recetas"
-        subtitle="El costo se calcula en vivo a partir de las medidas — nunca queda desactualizado"
+        subtitle="El costo se calcula en vivo a partir de las medidas: nunca queda desactualizado"
       />
       <RecipeEditor
         candidateProducts={candidateProducts.map((p) => ({ id: p.id, name: p.name }))}

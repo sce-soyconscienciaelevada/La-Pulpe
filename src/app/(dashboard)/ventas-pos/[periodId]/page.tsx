@@ -52,7 +52,7 @@ export default async function VentasPosPeriodPage({
 
   return (
     <div>
-      <PageHeader title={period.label} subtitle="Detalle del período — Ventas POS" />
+      <PageHeader title={period.label} subtitle="Detalle del período: Ventas POS" />
       <div className="space-y-4">
         <div className="grid sm:grid-cols-3 gap-3">
           <Card>

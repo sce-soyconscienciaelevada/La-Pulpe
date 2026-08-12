@@ -40,7 +40,7 @@ export default async function CristaleriaPage() {
     <div>
       <PageHeader
         title="Cristalería y Vajilla"
-        subtitle="Control semanal por ubicación — se acumula en un reporte mensual imprimible"
+        subtitle="Control semanal por ubicación: se acumula en un reporte mensual imprimible"
       />
       <CristaleriaTable
         venueId={venue.id}

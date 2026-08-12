@@ -71,7 +71,7 @@ export async function GET(request: Request) {
       <Page size="A4" orientation="landscape" style={styles.page}>
         <Text style={styles.title}>{venue.name.toUpperCase()}</Text>
         <Text style={styles.subtitle}>Control de Temperatura · Heladeras</Text>
-        <Text style={styles.weekLabel}>Registro Semanal — {formatWeekLabel(weekDates)}</Text>
+        <Text style={styles.weekLabel}>Registro Semanal · {formatWeekLabel(weekDates)}</Text>
 
         <View style={styles.section}>
           <View style={styles.headerRow}>
@@ -83,7 +83,7 @@ export async function GET(request: Request) {
           {units.map((unit) => (
             <View key={unit.id}>
               <View style={styles.row}>
-                <Text style={styles.cellUnit}>{unit.code} — {unit.name}</Text>
+                <Text style={styles.cellUnit}>{unit.code} · {unit.name}</Text>
                 {weekDates.map((day) => (
                   <Text key={dateKey(day)} style={styles.cellDay}>
                     {tempFor(unit.id, day) ?? "—"}
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>¿Algo salió mal? — Registro de Incidencias</Text>
+          <Text style={styles.sectionTitle}>Registro de Incidencias · ¿algo salió mal?</Text>
           <View style={styles.headerRow}>
             <Text style={styles.incCellDate}>Fecha</Text>
             <Text style={styles.incCellUnit}>Heladera</Text>
@@ -122,7 +122,7 @@ export async function GET(request: Request) {
                 <Text style={styles.incCellTemp}>{inc.tempRecorded ?? "—"}</Text>
                 <Text style={styles.incCellAction}>
                   {inc.actionTaken}
-                  {inc.responsiblePerson ? ` — ${inc.responsiblePerson.name}` : ""}
+                  {inc.responsiblePerson ? ` · ${inc.responsiblePerson.name}` : ""}
                 </Text>
               </View>
             ))

@@ -31,7 +31,7 @@ export default async function InventarioPage() {
     <div>
       <PageHeader
         title="Inventario"
-        subtitle={`${products.length} productos — stock en vivo, ajustá con +/− sin abrir un período`}
+        subtitle={`${products.length} productos. Stock en vivo, ajustá con +/− sin abrir un período`}
       />
       <InventarioList
         products={rows}

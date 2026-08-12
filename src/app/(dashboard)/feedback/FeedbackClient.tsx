@@ -294,7 +294,7 @@ export function FeedbackClient({ items }: { items: Item[] }) {
               {isPendingThis && (
                 <div className="mt-3 pt-3 border-t border-border">
                   <p className="text-xs text-text-muted mb-2">
-                    {pendingResolve.status === "DONE" ? "¿Qué se hizo?" : "¿Por qué no se va a hacer?"} — esto
+                    {pendingResolve.status === "DONE" ? "¿Qué se hizo?" : "¿Por qué no se va a hacer?"} Esto
                     queda en el log, el reporte desaparece de esta lista.
                   </p>
                   <textarea

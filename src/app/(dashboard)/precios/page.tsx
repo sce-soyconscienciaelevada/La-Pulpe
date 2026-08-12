@@ -37,8 +37,8 @@ export default async function PreciosPage() {
         title="Precios & Rentabilidad"
         subtitle={
           missing > 0
-            ? `${missing} de ${rows.length} productos sin precio de venta — cargalo abajo (ej: bottle $20 ÷ 12.5 medidas = $1.60 costo/medida)`
-            : "Ordenado por margen — peor primero"
+            ? `${missing} de ${rows.length} productos sin precio de venta. Cargalo abajo (ej: bottle $20 ÷ 12.5 medidas = $1.60 costo/medida)`
+            : "Ordenado por margen: peor primero"
         }
       />
       <PreciosTable rows={rows} />

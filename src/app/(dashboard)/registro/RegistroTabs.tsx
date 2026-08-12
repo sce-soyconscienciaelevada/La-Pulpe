@@ -83,7 +83,7 @@ export function RegistroTabs({
       </div>
 
       {dayStatus === "CLOSED" && (
-        <Badge tone="loss">Día cerrado — reabrí desde Reportes si necesitás editar</Badge>
+        <Badge tone="loss">Día cerrado. Reabrí desde Reportes si necesitás editar</Badge>
       )}
 
       {tab === "Dueños" && (

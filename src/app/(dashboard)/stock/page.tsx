@@ -27,7 +27,7 @@ export default async function StockPage() {
     <div>
       <PageHeader
         title="Stock semanal"
-        subtitle={`${period.label} — contá lo que hay físicamente, la diferencia se calcula sola al cerrar`}
+        subtitle={`${period.label}: contá lo que hay físicamente, la diferencia se calcula sola al cerrar`}
       />
       <StockCountTable
         periodId={period.id}

@@ -163,7 +163,7 @@ export function IngredientGrid({
           editable
         </span>
       </div>
-      <p className="text-xs text-text-muted mb-4">Cargá cada fila como en el Excel — Oz o Gr, nunca los dos.</p>
+      <p className="text-xs text-text-muted mb-4">Cargá cada fila como en el Excel. Oz o Gr, nunca los dos.</p>
 
       <div className="overflow-x-auto">
         <div className="min-w-[300px]">
@@ -222,7 +222,7 @@ export function IngredientGrid({
                     key={`${row.key}-cost`}
                     value={`${money(m.known!.costPerServing)}/u`}
                     disabled
-                    title="Costo real cargado en Productos — no se edita acá"
+                    title="Costo real cargado en Productos, no se edita acá"
                     className="w-full rounded-md border border-border-soft bg-transparent px-2 py-1.5 text-xs text-text-muted text-right tabular-nums"
                   />
                 ) : (

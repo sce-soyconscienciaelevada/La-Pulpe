@@ -1,20 +1,26 @@
 // Bump this string on every deploy that should trigger the "actualización
 // disponible" banner + "what's new" popup. Add a matching CHANGELOG entry --
 // that's what the popup shows. See TECHNICAL-GUIDE.md's deploy checklist.
-export const APP_VERSION = "2026-08-12.2";
+export const APP_VERSION = "2026-08-12.3";
 
 export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
+  "2026-08-12.3": {
+    title: "Textos de toda la app prolijados",
+    items: [
+      "Se revisaron los textos de todas las pantallas y los reportes en PDF para que se lean más naturales y menos como redactados por una IA.",
+    ],
+  },
   "2026-08-12.2": {
     title: "Arreglo: la app se veía apretada en el celular",
     items: [
-      "Todas las pantallas (no solo Recetario) se veían mal en el celular — el contenido quedaba apretado en una franja angosta al costado. Ya está arreglado en toda la app.",
+      "Todas las pantallas (no solo Recetario) se veían mal en el celular: el contenido quedaba apretado en una franja angosta al costado. Ya está arreglado en toda la app.",
       "Recetario: la tabla de ingredientes ahora entra completa en la pantalla del celular, sin tener que deslizar para ver el costo.",
     ],
   },
   "2026-08-12.1": {
     title: "Recetario: ingredientes editables + ficha técnica en PDF prolija",
     items: [
-      "Recetario: la lista de ingredientes ahora se completa ahí mismo, fila por fila (nombre, oz, gr, costo) — igual que en una planilla, ya no hace falta pasar por Costeo & Recetas primero",
+      "Recetario: la lista de ingredientes ahora se completa ahí mismo, fila por fila (nombre, oz, gr, costo), igual que en una planilla. Ya no hace falta pasar por Costeo & Recetas primero",
       "Recetario: cada fila calcula sola el costo mientras escribís, y muestra el total de la bebida",
       "Ficha técnica en PDF: la tabla de ingredientes ahora se ve prolija, con las mismas columnas que la planilla (oz, ml, gr, costo por litro/kg, costo líquidos, costo sólidos)",
       "Recetario: nuevo botón para volver al listado sin usar el menú",
@@ -23,15 +29,15 @@ export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
   "2026-07-31.5": {
     title: "Gráfico fijo al pasar el mouse + torta interactiva",
     items: [
-      "Inicio: el recuadro de detalle del gráfico ya no salta de lugar al mover el mouse — queda fijo arriba a la derecha",
-      "Inicio: la torta de \"Ventas por categoría\" ahora responde al pasar el mouse — resalta la porción y muestra su nombre, monto y porcentaje en el centro",
+      "Inicio: el recuadro de detalle del gráfico ya no salta de lugar al mover el mouse: queda fijo arriba a la derecha",
+      "Inicio: la torta de \"Ventas por categoría\" ahora responde al pasar el mouse: resalta la porción y muestra su nombre, monto y porcentaje en el centro",
     ],
   },
   "2026-07-31.4": {
     title: "Arreglo: Heladeras \"semana siguiente\" + gráfico del Inicio",
     items: [
-      "Heladeras: \"Semana siguiente\" se había quedado pegado en la misma semana por un problema de huso horario en el servidor — ahora avanza bien, semana por semana",
-      "Inicio: el gráfico de ventas a veces se veía \"cortado\" al pasar el mouse — el globito de info tapaba parte de la curva, ahora se corre al costado",
+      "Heladeras: \"Semana siguiente\" se había quedado pegado en la misma semana por un problema de huso horario en el servidor. Ahora avanza bien, semana por semana",
+      "Inicio: el gráfico de ventas a veces se veía \"cortado\" al pasar el mouse: el globito de info tapaba parte de la curva. Ahora se corre al costado",
       "Inicio: la torta de \"Ventas por categoría\" se acomodó para no salirse de su tarjeta en pantallas angostas",
     ],
   },
@@ -40,9 +46,9 @@ export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
     items: [
       "Los botones de toda la app ahora se ven clickeables (antes se veían iguales estén activos o no)",
       "Heladeras: el botón \"Semana siguiente\" avisa mientras carga la semana",
-      "Nombres de productos, personas y proveedores se corrigen solos — primera letra en mayúscula y acentos en las palabras más comunes, aunque los cargues todo en minúscula",
+      "Nombres de productos, personas y proveedores se corrigen solos: primera letra en mayúscula y acentos en las palabras más comunes, aunque los cargues todo en minúscula",
       "Productos: nuevo botón para volver al listado sin usar el menú",
-      "Feedback: los reportes resueltos piden una nota (\"¿qué se hizo?\") y pasan a un log separado — la lista activa queda corta",
+      "Feedback: los reportes resueltos piden una nota (\"¿qué se hizo?\") y pasan a un log separado. La lista activa queda corta",
       "Los emojis de bebidas se reemplazaron por íconos de vaso simples, según la categoría del producto",
     ],
   },
@@ -50,7 +56,7 @@ export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
     title: "Inicio: números de ejemplo hasta que arranques a cargar de verdad",
     items: [
       "El Inicio ahora muestra cifras de ejemplo (marcadas como tal) hasta que aprietes \"Empezar a cargar mis datos reales\"",
-      "Al confirmar, se guarda ese día como el primer día real — todo lo cargado antes queda afuera de comparaciones y gráficos",
+      "Al confirmar, se guarda ese día como el primer día real. Todo lo cargado antes queda afuera de comparaciones y gráficos",
       "\"Últimas consumiciones\" siempre muestra datos reales, nunca ejemplos",
     ],
   },
@@ -64,11 +70,11 @@ export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
   "2026-07-30.7": {
     title: "Arreglo: el Inicio no cargaba",
     items: [
-      "El Inicio tiraba error al abrirlo por una falla del gráfico nuevo — ya está arreglado y todas las secciones cargan bien",
+      "El Inicio tiraba error al abrirlo por una falla del gráfico nuevo. Ya está arreglado y todas las secciones cargan bien",
     ],
   },
   "2026-07-30.6": {
-    title: "Inicio renovado — gráfico, mezcla de consumo y torta por categoría",
+    title: "Inicio renovado: gráfico, mezcla de consumo y torta por categoría",
     items: [
       "Inicio: las 4 cifras de arriba ahora muestran comparación real contra el mismo día de la semana pasada (no solo el número de hoy)",
       "Inicio: nuevo gráfico de ventas de los últimos 14 días o del mes, con detalle al pasar el mouse o tocar cada punto",
@@ -79,7 +85,7 @@ export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
   "2026-07-30.5": {
     title: "Nuevos gráficos (todavía no visibles)",
     items: [
-      "Ajuste técnico interno — se prepararon los componentes de gráfico interactivo, barra de distribución y torta que van a aparecer en el Inicio en el próximo paso",
+      "Ajuste técnico interno: se prepararon los componentes de gráfico interactivo, barra de distribución y torta que van a aparecer en el Inicio en el próximo paso",
     ],
   },
   "2026-07-30.4": {
@@ -87,7 +93,7 @@ export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
     items: [
       "Los emojis del menú se reemplazaron por íconos más profesionales",
       "El menú ahora está organizado en grupos (Operación, Stock, Catálogo, Análisis, Sistema) en vez de una lista larga",
-      "Nuevo buscador rápido — hacé click en \"Buscar\" o apretá Ctrl K (⌘K en Mac) para saltar a cualquier sección escribiendo su nombre",
+      "Nuevo buscador rápido: hacé click en \"Buscar\" o apretá Ctrl K (⌘K en Mac) para saltar a cualquier sección escribiendo su nombre",
     ],
   },
   "2026-07-30.3": {
@@ -100,14 +106,14 @@ export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
   "2026-07-30.2": {
     title: "Preparando la nueva tipografía",
     items: [
-      "Ajuste técnico interno — todavía no hay cambios visibles de tipografía, eso viene en el próximo paso",
+      "Ajuste técnico interno: todavía no hay cambios visibles de tipografía, eso viene en el próximo paso",
     ],
   },
   "2026-07-30.1": {
     title: "Nueva paleta de colores",
     items: [
-      "Empezamos a actualizar el diseño del sistema — primer paso: colores más cálidos y profesionales",
-      "Todavía falta actualizar tipografía y el resto de la interfaz — esto sigue en las próximas semanas",
+      "Empezamos a actualizar el diseño del sistema. Primer paso: colores más cálidos y profesionales",
+      "Todavía falta actualizar tipografía y el resto de la interfaz. Esto sigue en las próximas semanas",
     ],
   },
   "2026-07-28.3": {
@@ -124,15 +130,15 @@ export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
   "2026-07-28.2": {
     title: "Botón de novedades (🔔)",
     items: [
-      "Nuevo ícono de campana arriba a la izquierda — abrilo cuando quieras para ver todo lo que se agregó al sistema, no solo la última actualización",
+      "Nuevo ícono de campana arriba a la izquierda: abrilo cuando quieras para ver todo lo que se agregó al sistema, no solo la última actualización",
     ],
   },
   "2026-07-28.1": {
     title: "Heladeras + Ventas POS + Inventario de Barra",
     items: [
-      "Nuevo: Control Temperatura Heladeras — registro semanal por unidad, incidencias y reporte imprimible",
-      "Nuevo: Ventas POS — cargá el total semanal del ticket por categoría, compará con la semana anterior y vinculá códigos a tus productos",
-      "Nuevo: Inventario de Barra — control diario de botellas abiertas por sistema de puntos, con reporte semanal",
+      "Nuevo: Control Temperatura Heladeras. Registro semanal por unidad, incidencias y reporte imprimible",
+      "Nuevo: Ventas POS. Cargá el total semanal del ticket por categoría, compará con la semana anterior y vinculá códigos a tus productos",
+      "Nuevo: Inventario de Barra. Control diario de botellas abiertas por sistema de puntos, con reporte semanal",
       "Productos: nuevo campo \"Puntos de conteo\" para sumar un producto a Inventario de Barra",
       "Feedback: si adjuntás una captura, ahora también llega como imagen a Telegram (antes solo texto)",
     ],

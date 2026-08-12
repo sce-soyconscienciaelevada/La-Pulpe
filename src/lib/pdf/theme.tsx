@@ -21,7 +21,7 @@ export function ReportHeader({ title, subtitle, venueName }: { title: string; su
     <View>
       <Text style={styles.title}>{venueName}</Text>
       <Text style={styles.subtitle}>
-        {title} — {subtitle}
+        {title} · {subtitle}
       </Text>
     </View>
   );

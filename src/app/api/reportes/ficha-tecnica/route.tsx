@@ -171,7 +171,7 @@ export async function GET(req: NextRequest) {
                 </Text>
               ))
             ) : (
-              <Text style={styles.emptyNote}>— sin preparación cargada todavía —</Text>
+              <Text style={styles.emptyNote}>(sin preparación cargada todavía)</Text>
             )}
           </View>
         </View>

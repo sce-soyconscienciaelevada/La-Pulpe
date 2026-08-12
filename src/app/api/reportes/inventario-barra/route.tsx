@@ -59,7 +59,7 @@ export async function GET(request: Request) {
     <Document>
       <Page size="A4" orientation="landscape" style={styles.page}>
         <Text style={styles.title}>{venue.name.toUpperCase()}</Text>
-        <Text style={styles.subtitle}>Inventario de Barra — Sistema de Puntos</Text>
+        <Text style={styles.subtitle}>Inventario de Barra · Sistema de Puntos</Text>
         <Text style={styles.weekLabel}>Semana {formatWeekLabel(weekDates)}</Text>
         <Text style={styles.weekLabel}>N = piezas cerradas. N+X/T = N cerradas más una abierta marcada en X de sus T puntos configurados (T junto al nombre).</Text>
 

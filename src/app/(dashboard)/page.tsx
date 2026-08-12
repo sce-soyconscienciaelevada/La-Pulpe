@@ -190,7 +190,7 @@ export default async function InicioPage() {
   if (withoutPrice > 0) {
     pendingParts.push(`${withoutPrice} sin precio de venta`);
   }
-  const greetingSubtitle = pendingParts.length > 0 ? `Hoy tenés ${pendingParts.join(" y ")}.` : "Sin pendientes — todo al día.";
+  const greetingSubtitle = pendingParts.length > 0 ? `Hoy tenés ${pendingParts.join(" y ")}.` : "Sin pendientes, todo al día.";
 
   const recent = [...summary.consumptions].reverse().slice(0, 15);
 
@@ -291,9 +291,9 @@ export default async function InicioPage() {
           <SectionHead title="Top tragos por rentabilidad" />
           {topByMargin.length === 0 ? (
             <p className="text-sm text-text-muted">
-              Sin precios de venta cargados todavía —{" "}
+              Sin precios de venta cargados todavía.{" "}
               <Link href="/precios" className="text-accent underline">
-                cargalos en Precios &amp; Rentabilidad
+                Cargalos en Precios &amp; Rentabilidad
               </Link>
               .
             </p>
@@ -318,7 +318,7 @@ export default async function InicioPage() {
         <Card>
           <SectionHead title="Alertas de stock bajo" />
           {lowStockFiltered.length === 0 ? (
-            <p className="text-sm text-text-muted">Sin alertas — definí umbrales en Productos para activarlas.</p>
+            <p className="text-sm text-text-muted">Sin alertas. Definí umbrales en Productos para activarlas.</p>
           ) : (
             <ul className="space-y-2">
               {lowStockFiltered.map((p) => (

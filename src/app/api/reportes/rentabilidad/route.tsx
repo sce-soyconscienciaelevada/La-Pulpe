@@ -31,7 +31,7 @@ export async function GET() {
       <Page size="A4" style={styles.page}>
         <ReportHeader
           title="Rentabilidad por trago"
-          subtitle={`${products.length} productos — ordenado por margen`}
+          subtitle={`${products.length} productos, ordenado por margen`}
           venueName={venue.name}
         />
         <View style={styles.rowHeader}>

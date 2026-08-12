@@ -15,7 +15,7 @@ export default async function RecetarioPage() {
     <div>
       <PageHeader
         title="Recetario"
-        subtitle="Ficha técnica de cada trago — foto, descripción, preparación y guarnición"
+        subtitle="Ficha técnica de cada trago: foto, descripción, preparación y guarnición"
       />
 
       {recipes.length === 0 ? (
@@ -25,7 +25,7 @@ export default async function RecetarioPage() {
             <Link href="/costeo" className="text-accent underline">
               Creá una en Costeo & Recetas
             </Link>{" "}
-            primero (elegís el producto y los ingredientes) — después volvé acá para
+            primero (elegís el producto y los ingredientes). Después volvé acá para
             completar la ficha técnica.
           </p>
         </Card>
