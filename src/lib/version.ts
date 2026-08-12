@@ -1,9 +1,18 @@
 // Bump this string on every deploy that should trigger the "actualización
 // disponible" banner + "what's new" popup. Add a matching CHANGELOG entry --
 // that's what the popup shows. See TECHNICAL-GUIDE.md's deploy checklist.
-export const APP_VERSION = "2026-07-31.5";
+export const APP_VERSION = "2026-08-12.1";
 
 export const CHANGELOG: Record<string, { title: string; items: string[] }> = {
+  "2026-08-12.1": {
+    title: "Recetario: ingredientes editables + ficha técnica en PDF prolija",
+    items: [
+      "Recetario: la lista de ingredientes ahora se completa ahí mismo, fila por fila (nombre, oz, gr, costo) — igual que en una planilla, ya no hace falta pasar por Costeo & Recetas primero",
+      "Recetario: cada fila calcula sola el costo mientras escribís, y muestra el total de la bebida",
+      "Ficha técnica en PDF: la tabla de ingredientes ahora se ve prolija, con las mismas columnas que la planilla (oz, ml, gr, costo por litro/kg, costo líquidos, costo sólidos)",
+      "Recetario: nuevo botón para volver al listado sin usar el menú",
+    ],
+  },
   "2026-07-31.5": {
     title: "Gráfico fijo al pasar el mouse + torta interactiva",
     items: [
