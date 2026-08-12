@@ -136,7 +136,7 @@ export async function seedDemo(): Promise<{ venueId: string }> {
   ] as const;
 
   const productByName: Record<string, { id: string; costPricePerContainer: number; salePricePerServing: number | null }> = {};
-  const products = [];
+  const products: Awaited<ReturnType<typeof prisma.product.create>>[] = [];
   let quickSort = 1;
   for (const p of productDefs) {
     const cost = money(p.cost[0], p.cost[1]);
@@ -333,21 +333,38 @@ export async function seedDemo(): Promise<{ venueId: string }> {
   }
 
   // ── Ventas POS ─────────────────────────────────────────────
+  // totalUnidades/totalTicket are the "esperado" (expected, as printed on
+  // the POS ticket) side of a reconciliation check against "cargado" (sum
+  // of the actual line rows) — they must be generated FROM the line data,
+  // not independently, or the UI correctly (and permanently) flags every
+  // single period/category as mismatched.
   const posCategoryNames = ["Cervezas", "Tragos", "Vinos", "Sin Alcohol"];
   for (let i = 3; i >= 0; i--) {
     const startAt = daysAgo((i + 1) * 7);
     const endAt = daysAgo(i * 7);
-    const period = await prisma.posSalesPeriod.create({
-      data: { venueId: venue.id, label: `Período POS semana ${4 - i}`, startAt, endAt, status: i === 0 ? "OPEN" : "CLOSED", totalUnidades: faker.number.int({ min: 300, max: 900 }), closedAt: i === 0 ? null : endAt },
-    });
-    for (const [ci, catName] of posCategoryNames.entries()) {
-      const category = await prisma.posSalesCategory.create({ data: { periodId: period.id, name: catName, totalTicket: faker.number.int({ min: 40000, max: 250000 }), sortOrder: ci } });
+
+    const categoryPlans = posCategoryNames.map((catName) => {
       const lineCount = faker.number.int({ min: 3, max: 6 });
-      for (let li = 0; li < lineCount; li++) {
+      const lines = Array.from({ length: lineCount }, () => {
         const product = faker.helpers.arrayElement(products);
-        await prisma.posSalesLine.create({
-          data: { categoryId: category.id, posCode: faker.string.numeric(3), descripcion: product.name, unidadesVendidas: faker.number.int({ min: 5, max: 80 }), productId: faker.datatype.boolean({ probability: 0.8 }) ? product.id : null },
-        });
+        return {
+          posCode: faker.string.numeric(3),
+          descripcion: product.name,
+          unidadesVendidas: faker.number.int({ min: 5, max: 80 }),
+          productId: faker.datatype.boolean({ probability: 0.8 }) ? product.id : null,
+        };
+      });
+      return { catName, lines, total: lines.reduce((s, l) => s + l.unidadesVendidas, 0) };
+    });
+    const periodTotal = categoryPlans.reduce((s, c) => s + c.total, 0);
+
+    const period = await prisma.posSalesPeriod.create({
+      data: { venueId: venue.id, label: `Período POS semana ${4 - i}`, startAt, endAt, status: i === 0 ? "OPEN" : "CLOSED", totalUnidades: periodTotal, closedAt: i === 0 ? null : endAt },
+    });
+    for (const [ci, plan] of categoryPlans.entries()) {
+      const category = await prisma.posSalesCategory.create({ data: { periodId: period.id, name: plan.catName, totalTicket: plan.total, sortOrder: ci } });
+      for (const line of plan.lines) {
+        await prisma.posSalesLine.create({ data: { categoryId: category.id, ...line } });
       }
     }
   }

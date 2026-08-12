@@ -371,8 +371,8 @@ export function Sidebar({
 
       <aside
         className={`
-          fixed md:static inset-y-0 left-0 z-30 w-72 shrink-0 bg-bg-elevated border-r border-border
-          flex flex-col transition-transform duration-200
+          fixed md:sticky inset-y-0 md:top-0 left-0 z-30 w-72 shrink-0 bg-bg-elevated border-r border-border
+          flex flex-col transition-transform duration-200 md:h-screen
           ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
         `}
       >
